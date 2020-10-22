@@ -95,6 +95,8 @@ async def follow_mash_steps(mash_steps, fermentables):
             print('You need to add water to continue!')
         if weighing is None:
             weighing = await asyncio.gather(change_temp(ms.step_temp), weigh(fermentables, confirm=True))
+        else:
+            await change_temp(ms.step_temp)
 
 
 files = get_filenames('./recipes', extension='.xml')
