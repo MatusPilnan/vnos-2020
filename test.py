@@ -1,6 +1,6 @@
 from pybeerxml.parser import Parser
 
-path_to_beerxml_file = "/home/pi/Desktop/vnos/files/test.xml"
+path_to_beerxml_file = "/home/pi/Desktop/vnos/recipes/test.xml"
 
 parser = Parser()
 recipes = parser.parse(path_to_beerxml_file)
