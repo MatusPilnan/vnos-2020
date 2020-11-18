@@ -7,3 +7,5 @@ termcolor~=1.1.0
 git+https://github.com/tatobari/hx711py.git
 
 Quart~=0.13.1
+
+actorio~=0.1.4

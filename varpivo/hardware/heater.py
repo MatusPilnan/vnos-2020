@@ -1,0 +1,2 @@
+class Heater(object):
+    pass

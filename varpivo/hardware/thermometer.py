@@ -1,0 +1,2 @@
+class Thermometer(object):
+    pass
