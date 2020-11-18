@@ -1,0 +1,1 @@
+RECIPES_DIR = 'recipes'

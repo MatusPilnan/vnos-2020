@@ -1,4 +1,4 @@
-from app import app
+from varpivo import app
 import asyncio
 
 
