@@ -8,7 +8,6 @@ from http import HTTPStatus
 
 from varpivo.steps import Step
 
-
 recipe_model = {
     'type': 'object',
     'title': 'Recipe',
@@ -24,19 +23,28 @@ recipe_model = {
             'properties': {
                 'name': {'type': 'string'},
                 'type': {'type': 'string'}
-            }
+            },
+            'required': ['name', 'type']
         },
     },
-    'required': ['id', 'style']
+    'required': ['id', 'style', 'name']
 }
 
 
 # api = OpenApiView(app=blueprint, title="Var:Pivo API", doc="/documentation", version=API_VERSION)
+
 @app.route("/recipe")
 class RecipeList(Resource):
     @app.response(HTTPStatus.OK, description="", validator=app.create_validator('recipe_list', {
-        'type': 'array',
-        'items': recipe_model
+        'title': 'RecipeList',
+        'type': 'object',
+        'properties': {
+            'recipes': {
+                'type': 'array',
+                'items': recipe_model
+            }
+        },
+        'required': ['recipes']
     }))
     @crossdomain("*")
     async def get(self):
@@ -59,39 +67,49 @@ def step_to_dict(step: Step):
             "available": step.available}
 
 
-recipe_steps = app.create_validator('recipe_steps', {
-    'type': 'array',
-    'items': {
-        'type': 'object',
-        'title': 'RecipeStep',
-        'properties': {
-            "started": {
-                "type": "string"
-            },
-            "finished": {
-                "type": "string"
-            },
-            "progress": {
-                "type": "string"
-            },
-            "estimation": {
-                "type": "integer"
-            },
-            "description": {
-                "type": "string"
-            },
-            "duration_mins": {
-                "type": "integer"
-            },
-            "name": {
-                "type": "string"
-            },
-            "available": {
-                "type": "boolean"
-            }
-        }
-    },
-})
+recipe_steps = app.create_validator('recipe_steps',
+                                    {
+                                        "type": "object",
+                                        "title": "StepsList",
+                                        "required": ["steps"],
+                                        "properties": {
+                                            "steps": {
+                                                'type': 'array',
+                                                'items': {
+                                                    'type': 'object',
+                                                    'title': 'RecipeStep',
+                                                    'properties': {
+                                                        "started": {
+                                                            "type": "string"
+                                                        },
+                                                        "finished": {
+                                                            "type": "string"
+                                                        },
+                                                        "progress": {
+                                                            "type": "string"
+                                                        },
+                                                        "estimation": {
+                                                            "type": "integer"
+                                                        },
+                                                        "description": {
+                                                            "type": "string",
+                                                            "default": ""
+                                                        },
+                                                        "duration_mins": {
+                                                            "type": "integer"
+                                                        },
+                                                        "name": {
+                                                            "type": "string"
+                                                        },
+                                                        "available": {
+                                                            "type": "boolean"
+                                                        }
+                                                    },
+                                                    "required": ["name", "available", "description"]
+                                                }
+                                            }
+                                        }
+                                    })
 
 
 # noinspection PyUnresolvedReferences
