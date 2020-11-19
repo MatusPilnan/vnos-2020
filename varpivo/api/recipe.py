@@ -1,39 +1,44 @@
 from quart import jsonify
 from quart_openapi import Resource
+from quart_openapi.cors import crossdomain
+
 from varpivo import app
 from varpivo.recipe import CookBook
 from http import HTTPStatus
 
 from varpivo.steps import Step
 
-recipe_list_properties = {
-    'name': {
-        'type': 'string'
+
+recipe_model = {
+    'type': 'object',
+    'title': 'Recipe',
+    'properties': {
+        'name': {
+            'type': 'string'
+        },
+        'id': {
+            'type': 'string',
+        },
+        'style': {
+            'type': 'object',
+            'properties': {
+                'name': {'type': 'string'},
+                'type': {'type': 'string'}
+            }
+        },
     },
-    'id': {
-        'type': 'string'
-    },
-    'style': {
-        'type': 'object',
-        'properties': {
-            'name': {'type': 'string'},
-            'type': {'type': 'string'}
-        }
-    }
+    'required': ['id', 'style']
 }
-recipe_list = app.create_validator('recipe_list', {
-    'type': 'array',
-    'items': {
-        'type': 'object',
-        'properties': recipe_list_properties
-    },
-})
 
 
 # api = OpenApiView(app=blueprint, title="Var:Pivo API", doc="/documentation", version=API_VERSION)
 @app.route("/recipe")
 class RecipeList(Resource):
-    @app.response(HTTPStatus.OK, description="", validator=recipe_list)
+    @app.response(HTTPStatus.OK, description="", validator=app.create_validator('recipe_list', {
+        'type': 'array',
+        'items': recipe_model
+    }))
+    @crossdomain("*")
     async def get(self):
         '''Retrieve all available recipes
 
@@ -54,10 +59,11 @@ def step_to_dict(step: Step):
             "available": step.available}
 
 
-recipe_list = app.create_validator('recipe_steps', {
+recipe_steps = app.create_validator('recipe_steps', {
     'type': 'array',
     'items': {
         'type': 'object',
+        'title': 'RecipeStep',
         'properties': {
             "started": {
                 "type": "string"
@@ -89,27 +95,29 @@ recipe_list = app.create_validator('recipe_steps', {
 
 
 # noinspection PyUnresolvedReferences
-@app.param("recipe_id", "Recipe ID", "path", required=True)
-@app.route('/recipe/<recipe_id>')
+@app.param("recipeId", "Recipe ID", "path", required=True)
+@app.route('/recipe/<recipeId>')
 class Recipe(Resource):
 
+    @crossdomain("*")
     @app.response(HTTPStatus.NOT_FOUND, "Recipe not found")
-    @app.response(HTTPStatus.OK, description="",
-                  validator=app.create_validator('recipe', {"type": "object", "properties": recipe_list_properties}))
-    async def get(self, recipe_id):
+    @app.response(HTTPStatus.OK, description="Returns a signle recipe",
+                  validator=app.create_validator('recipe', recipe_model))
+    async def get(self, recipeId):
         try:
-            return jsonify(CookBook()[recipe_id].cookbook_entry)
+            return jsonify(CookBook()[recipeId].cookbook_entry)
         except KeyError:
             return jsonify({"error": 'Recipe not found'}), 404
 
+    @crossdomain("*")
     @app.response(HTTPStatus.NOT_FOUND, "Recipe not found")
     @app.response(HTTPStatus.CONFLICT, "Recipe already selected")
     @app.response(HTTPStatus.OK, description="",
-                  validator=app.create_validator('recipe', {"type": "object", "properties": recipe_list_properties}))
-    async def post(self, recipe_id):
+                  validator=recipe_steps)
+    async def post(self, recipeId):
         try:
             # TODO - skontrolovat ci uz nahodou neni nejaky vybraty
             # TODO - vybrat :)
-            return jsonify(list(map(step_to_dict, CookBook()[recipe_id].steps)))
+            return jsonify(list(map(step_to_dict, CookBook()[recipeId].steps)))
         except KeyError:
             return jsonify({"error": 'Recipe not found'}), 404
