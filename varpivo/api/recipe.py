@@ -53,7 +53,7 @@ class RecipeList(Resource):
         This docstring will show up as the description and short-description
         for the openapi docs for this route.
         '''
-        return jsonify(list(map(lambda recipe: recipe.cookbook_entry, CookBook().recipes.values())))
+        return jsonify({"recipes": list(map(lambda recipe: recipe.cookbook_entry, CookBook().recipes.values()))})
 
 
 def step_to_dict(step: Step):
