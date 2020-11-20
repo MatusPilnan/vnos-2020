@@ -1,12 +1,11 @@
+import glob
+from os.path import basename
 from typing import Dict, List
 
-from pybeerxml.parser import Parser
-import glob
-
 from pybeerxml import recipe
+from pybeerxml.parser import Parser
 
 from varpivo.config.config import RECIPES_DIR
-from os.path import basename
 from varpivo.steps import *
 
 
@@ -41,7 +40,7 @@ class Recipe(recipe.Recipe):
             self.steps.append(KeepTemperature(name=ms.name, duration=int(ms.step_time)))
 
         self.steps.append(Step(name='Mashout', description='Take the mash out of the kettle', duration=2,
-                               dependencies=self.steps[-1]))
+                               dependencies=[self.steps[-1]]))
         self.steps.append(SetTemperature(target=100, dependencies=[self.steps[-1]]))
 
         remaining_boil_time = int(recipe.boil_time)
@@ -53,16 +52,31 @@ class Recipe(recipe.Recipe):
                                          dependencies=[self.steps[-1], hop_boil_addition_deps[i]]))
                 remaining_boil_time = hop.time
 
-
     @property
     def cookbook_entry(self):
+        # noinspection PyUnresolvedReferences
         return {"name": self.recipe.name, "id": self.id,
                 "style": {"name": self.recipe.style.name, "type": self.recipe.style.type}}
 
 
 class CookBook:
+    __instance = None
+    selected_recipe = None
+
+    @staticmethod
+    def get_instance():
+        if CookBook.__instance is None:
+            CookBook()
+
+        return CookBook.__instance
+
     def __init__(self) -> None:
         super().__init__()
+        if CookBook.__instance is not None:
+            raise Exception("This class is a singleton!")
+        else:
+            CookBook.__instance = self
+
         parser = Parser()
         path = RECIPES_DIR
         self.recipes: Dict[Recipe] = {}

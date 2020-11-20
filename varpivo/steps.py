@@ -1,9 +1,17 @@
-class Step:
+import json
+from time import time
 
+from quart import jsonify
+
+from varpivo import broadcast
+
+
+class Step:
     started = None
     finished = None
     progress = None
     estimation = None
+    next_step = None
 
     def __init__(self, name: str, description: str, duration: int, dependencies=None) -> None:
         super().__init__()
@@ -12,45 +20,88 @@ class Step:
         self.description = description
         self.duration = duration
         self.name = name
-        self.dependendies = dependencies
+        self.dependencies = list(dependencies)
+
+        for dependency in dependencies:
+            if not isinstance(dependency, WeighIngredient):
+                dependency.next_step = self
 
     @property
     def available(self):
-        for dependency in self.dependendies:
+        for dependency in self.dependencies:
             if not dependency.finished:
                 return False
         return not self.started
+
+    def to_dict(self):
+        return {"started": self.started,
+                "finished": self.finished,
+                "progress": self.progress,
+                "estimation": self.estimation,
+                "description": self.description,
+                "duration": self.duration,
+                "name": self.name,
+                "available": self.available}
+
+    def to_keg(self):
+        return json.dumps({"payload": json.dumps(self.to_dict()), "content": "step"})
+
+    async def start(self):
+        self.started = time()
+        await broadcast(self.to_keg())
+
+    async def stop(self):
+        self.finished = time()
+        await broadcast(self.to_keg())
+        if self.next_step.available:
+            await self.next_step.start()
 
 
 class AddWater(Step):
 
     def __init__(self, amount: int, dependencies=None) -> None:
         super().__init__(name=f'Add water: {amount:.2f} L', description=f'Add {amount:.2f} L water for infusion.',
-                         duration=2 + amount//2, dependencies=dependencies)
+                         duration=2 + amount // 2, dependencies=dependencies)
 
 
 class SetTemperature(Step):
 
     def __init__(self, target: int, dependencies=None) -> None:
         super().__init__(name=f'Heat water: {target:.2f} C', description=f'Heat water to {target:.2f}°C.',
-                         duration=target//2, dependencies=dependencies)
+                         duration=target // 2, dependencies=dependencies)
         self.target = target
+
+    def start(self):
+        super().start()
 
 
 class WeighIngredient(Step):
 
     def __init__(self, ingredient: str, grams: int, dependencies=None) -> None:
-        super().__init__(f'Weight {ingredient}: {grams}g', description=f'Weight {grams} grams of {ingredient}.', duration=3, dependencies=dependencies)
+        super().__init__(f'Weight {ingredient}: {grams}g', description=f'Weight {grams} grams of {ingredient}.',
+                         duration=3, dependencies=dependencies)
         self.grams = grams
+
+    def stop(self):
+        self.finished = time()
+        broadcast(jsonify(self.to_dict()))
 
 
 class KeepTemperature(Step):
 
     def __init__(self, name: str, duration: int, dependencies=None) -> None:
-        super().__init__(name=name, description=f"Keep temperature for {duration} minutes.", duration=duration, dependencies=dependencies)
+        super().__init__(name=name, description=f"Keep temperature for {duration} minutes.", duration=duration,
+                         dependencies=dependencies)
+
+    def start(self):
+        super().start()
+
+    def stop(self):
+        super().stop()
 
 
 class AddHop(Step):
 
-    def __init__(self, name: str, grams: int, dependencies=None)-> None:
-        super().__init__(name=f'Add hops: {name}', description=f'Add {grams} gramsof {name} hops.', duration=1, dependencies=dependencies)
+    def __init__(self, name: str, grams: int, dependencies=None) -> None:
+        super().__init__(name=f'Add hops: {name}', description=f'Add {grams} gramsof {name} hops.', duration=1,
+                         dependencies=dependencies)
