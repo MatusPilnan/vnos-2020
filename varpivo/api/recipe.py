@@ -5,45 +5,14 @@ from quart_openapi import Resource
 from quart_openapi.cors import crossdomain
 
 from varpivo import app
+from varpivo.api.models import recipe_model, step_model, ws_message_model, recipe_list_model, recipe_steps_model
 from varpivo.recipe import CookBook
 from varpivo.steps import Step
-
-recipe_model = {
-    'type': 'object',
-    'title': 'Recipe',
-    'properties': {
-        'name': {
-            'type': 'string'
-        },
-        'id': {
-            'type': 'string',
-        },
-        'style': {
-            'type': 'object',
-            'properties': {
-                'name': {'type': 'string'},
-                'type': {'type': 'string'}
-            },
-            'required': ['name', 'type']
-        },
-    },
-    'required': ['id', 'style', 'name']
-}
 
 
 @app.route("/recipe")
 class RecipeList(Resource):
-    @app.response(HTTPStatus.OK, description="", validator=app.create_validator('recipe_list', {
-        'title': 'RecipeList',
-        'type': 'object',
-        'properties': {
-            'recipes': {
-                'type': 'array',
-                'items': recipe_model
-            }
-        },
-        'required': ['recipes']
-    }))
+    @app.response(HTTPStatus.OK, description="", validator=app.create_validator('recipe_list', recipe_list_model))
     @crossdomain("*")
     async def get(self):
         '''Retrieve all available recipes
@@ -59,65 +28,8 @@ def step_to_dict(step: Step):
     return step.to_dict()
 
 
-step_model = {
-    'type': 'object',
-    'title': 'RecipeStep',
-    'properties': {
-        "started": {
-            "type": "number"
-        },
-        "finished": {
-            "type": "number"
-        },
-        "progress": {
-            "type": "number"
-        },
-        "estimation": {
-            "type": "number"
-        },
-        "description": {
-            "type": "string",
-            "default": ""
-        },
-        "duration_mins": {
-            "type": "number"
-        },
-        "name": {
-            "type": "string"
-        },
-        "available": {
-            "type": "boolean"
-        }
-    },
-    "required": ["name", "available", "description"]
-}
 recipe_step = app.create_validator('recipe_step', step_model)
-recipe_steps = app.create_validator('recipe_steps',
-                                    {
-                                        "type": "object",
-                                        "title": "StepsList",
-                                        "required": ["steps"],
-                                        "properties": {
-                                            "steps": {
-                                                'type': 'array',
-                                                'items': step_model
-                                            }
-                                        }
-                                    })
-
-ws_message_model = {
-    "type": "object",
-    "title": "WSKeg",
-    "required": ["payload", "content"],
-    "properties": {
-        "payload": {
-            "type": "string"
-        },
-        "content": {
-            "type": "string"
-        }
-    }
-}
+recipe_steps = app.create_validator('recipe_steps', recipe_steps_model)
 
 
 # noinspection PyUnresolvedReferences,PyPep8Naming

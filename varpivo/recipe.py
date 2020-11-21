@@ -16,10 +16,12 @@ class Recipe(recipe.Recipe):
         self.id = id
         self.recipe = recipe
         self.steps: List[Step] = []
+        self.ingredients = []
 
         mash_fermentable_count = 0
         after_boil_fermentables = []
         for fermentable in recipe.fermentables:
+            self.ingredients.append(Fermentable(fermentable).to_dict())
             if not fermentable.add_after_boil:
                 mash_fermentable_count += 1
                 self.steps.append(WeighIngredient(grams=int(fermentable.amount * 1000), ingredient=fermentable.name,
@@ -38,6 +40,7 @@ class Recipe(recipe.Recipe):
         recipe.hops.sort(key=(lambda h: h.time), reverse=True)
         hop_boil_addition_deps = []
         for hop in recipe.hops:
+            self.ingredients.append(Hop(hop).to_dict())
             if hop.use == 'Boil':
                 step = WeighIngredient(grams=int(hop.amount * 1000), ingredient=hop.name, dependencies=[])
                 self.steps.append(step)
@@ -60,6 +63,7 @@ class Recipe(recipe.Recipe):
 
         miscs = []
         for misc in recipe.miscs:
+            self.ingredients.append(Misc(misc).to_dict())
             if misc.use == 'Boil':
                 miscs.append(misc)
 
@@ -100,7 +104,8 @@ class Recipe(recipe.Recipe):
     def cookbook_entry(self):
         # noinspection PyUnresolvedReferences
         return {"name": self.recipe.name, "id": self.id,
-                "style": {"name": self.recipe.style.name, "type": self.recipe.style.type}}
+                "style": {"name": self.recipe.style.name, "type": self.recipe.style.type},
+                "ingredients": self.ingredients}
 
 
 class CookBook:
@@ -133,3 +138,28 @@ class CookBook:
 
     def __getitem__(self, item) -> Recipe:
         return self.recipes[item]
+
+
+class Ingredient:
+    def __init__(self, name: str, amount: float, unit: str) -> None:
+        self.name = name
+        self.amount = amount
+        self.unit = unit
+
+    def to_dict(self):
+        return {"name": self.name, "amount": self.amount, "unit": self.unit}
+
+
+class Fermentable(Ingredient):
+    def __init__(self, fermentable: recipe.Fermentable) -> None:
+        super().__init__(name=fermentable.name, amount=fermentable.amount, unit='kg')
+
+
+class Hop(Ingredient):
+    def __init__(self, hop: recipe.Hop) -> None:
+        super().__init__(name=hop.name, amount=hop.amount * 1000, unit='g')
+
+
+class Misc(Ingredient):
+    def __init__(self, misc: recipe.Misc) -> None:
+        super().__init__(name=misc.name, amount=misc.amount, unit='units')
