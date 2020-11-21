@@ -103,5 +103,11 @@ class KeepTemperature(Step):
 class AddHop(Step):
 
     def __init__(self, name: str, grams: int, dependencies=None) -> None:
-        super().__init__(name=f'Add hops: {name}', description=f'Add {grams} gramsof {name} hops.', duration=1,
+        super().__init__(name=f'Add hops: {name}', description=f'Add {grams} grams of {name} hops.', duration=1,
+                         dependencies=dependencies)
+
+
+class AddMisc(Step):
+    def __init__(self, name: str, amount: float, misc_type: str, dependencies=None) -> None:
+        super().__init__(name=f'Add {name}', description=f'Add {amount:.2f} units of {name} ({misc_type})', duration=1,
                          dependencies=dependencies)
