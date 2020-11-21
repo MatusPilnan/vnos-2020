@@ -145,7 +145,7 @@ class Recipe(Resource):
         try:
             if not CookBook.get_instance().selected_recipe:
                 CookBook.get_instance().selected_recipe = CookBook.get_instance()[recipeId]
-                return jsonify(list(map(step_to_dict, CookBook.get_instance()[recipeId].steps)))
+                return jsonify({"steps": list(map(step_to_dict, CookBook.get_instance()[recipeId].steps))})
             else:
                 return jsonify({"error": 'Recipe already selected'}), HTTPStatus.CONFLICT
         except KeyError:
