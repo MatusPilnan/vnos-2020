@@ -7,6 +7,7 @@ from pybeerxml.parser import Parser
 
 from varpivo.config.config import RECIPES_DIR
 from varpivo.steps import *
+from varpivo.utils import prepare_recipe_files
 
 
 class Recipe(recipe.Recipe):
@@ -79,6 +80,7 @@ class CookBook:
 
         parser = Parser()
         path = RECIPES_DIR
+        prepare_recipe_files(glob.glob(f"{path}/*.xml"))
         self.recipes: Dict[Recipe] = {}
         for file in glob.glob(f"{path}/*.xml"):
             for index, recipe in enumerate(parser.parse(xml_file=file)):

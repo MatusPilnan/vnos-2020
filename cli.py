@@ -8,6 +8,8 @@ from pybeerxml.parser import Parser
 from pybeerxml.recipe import Recipe
 from termcolor import colored
 
+from varpivo.utils import prepare_recipe_files
+
 pyfiglet.print_figlet('Var:Pivo', font='basic', colors='YELLOW:DEFAULT')
 colorama.init()
 MASH = 1
@@ -56,16 +58,7 @@ def print_ingredients(recipe: Recipe, step=None):
                 print(f'{f.name} - {f.amount:.2f} kg')
 
 
-def prepare_recipe_files(recipe_files):
-    for file in recipe_files:
-        with open(file) as f:
-            content = f.read()
 
-        content = content.replace('>true<', '>1<').replace('>TRUE<', '>1<')
-        content = content.replace('>false<', '>0<').replace('>FALSE<', '>0<')
-
-        with open(file, 'w') as f:
-            f.write(content)
 
 
 async def change_temp(target):
