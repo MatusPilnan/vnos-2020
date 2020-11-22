@@ -3,7 +3,8 @@ from time import time
 
 from quart import jsonify
 
-from varpivo import broadcast
+from varpivo import broadcast, event_queue
+from varpivo.utils import Event
 
 
 class Step:
@@ -48,11 +49,11 @@ class Step:
 
     async def start(self):
         self.started = time()
-        await broadcast(self.to_keg())
+        await event_queue.put(Event(Event.STEP, payload=self))
 
     async def stop(self):
         self.finished = time()
-        await broadcast(self.to_keg())
+        await event_queue.put(Event(Event.STEP, payload=self))
         if self.next_step.available:
             await self.next_step.start()
 

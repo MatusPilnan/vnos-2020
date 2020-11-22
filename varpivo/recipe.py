@@ -1,10 +1,12 @@
 import glob
-from os.path import basename
+import shelve
+from os.path import basename, exists
 from typing import Dict, List
 
 from pybeerxml import recipe
 from pybeerxml.parser import Parser
 
+from varpivo import event_observers
 from varpivo.config.config import RECIPES_DIR
 from varpivo.steps import *
 from varpivo.utils import prepare_recipe_files
@@ -109,10 +111,15 @@ class Recipe(recipe.Recipe):
                 "style": {"name": self.recipe.style.name, "type": self.recipe.style.type},
                 "ingredients": self.ingredients}
 
+    def to_checkpoint(self):
+        return self
+
 
 class CookBook:
     __instance = None
     selected_recipe = None
+
+    CHECKPOINT_FILE = "shelf.page"
 
     @staticmethod
     def get_instance():
@@ -121,6 +128,12 @@ class CookBook:
 
         return CookBook.__instance
 
+    @staticmethod
+    async def step_observer(event: Event):
+        if event.event_type[0] == Event.STEP:
+            CookBook.get_instance().save_checkpoint()
+            await event_queue.put(Event(Event.WS, payload=event.payload.to_keg()))
+
     def __init__(self) -> None:
         super().__init__()
         if CookBook.__instance is not None:
@@ -128,6 +141,8 @@ class CookBook:
         else:
             CookBook.__instance = self
 
+        event_observers.add(CookBook.step_observer)
+        self.check_checkpoint()
         parser = Parser()
         path = RECIPES_DIR
         prepare_recipe_files(glob.glob(f"{path}/*.xml"))
@@ -138,8 +153,36 @@ class CookBook:
                 # noinspection PyTypeChecker
                 self.recipes[id] = Recipe(id=id, recipe=recipe)
 
+    def select_recipe(self, recipeId):
+        if self.selected_recipe:
+            return False
+        self.selected_recipe = self[recipeId]
+        return True
+
     def __getitem__(self, item) -> Recipe:
         return self.recipes[item]
+
+    def check_checkpoint(self):
+        if not exists(self.CHECKPOINT_FILE):
+            return
+        checkpoint = shelve.open(self.CHECKPOINT_FILE)
+        self.checkpoint = {"recipe": checkpoint["recipe"], "time": checkpoint["time"]}
+        checkpoint.close()
+
+    def load_checkpoint(self):
+        if self.checkpoint:
+            self.selected_recipe = self.checkpoint["recipe"]
+            return True
+        return False
+
+    def save_checkpoint(self):
+        if self.selected_recipe:
+            checkpoint = shelve.open(self.CHECKPOINT_FILE)
+            checkpoint["recipe"] = self.selected_recipe.to_checkpoint()
+            checkpoint["time"] = time()
+            checkpoint.close()
+            return True
+        return False
 
 
 class Ingredient:

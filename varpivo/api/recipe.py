@@ -55,8 +55,7 @@ class Recipe(Resource):
     async def post(self, recipeId):
 
         try:
-            if not CookBook.get_instance().selected_recipe:
-                CookBook.get_instance().selected_recipe = CookBook.get_instance()[recipeId]
+            if CookBook.get_instance().select_recipe(recipeId):
                 return jsonify({"steps": list(map(step_to_dict, CookBook.get_instance()[recipeId].steps))})
             else:
                 return jsonify({"error": 'Recipe already selected'}), HTTPStatus.CONFLICT
@@ -86,7 +85,7 @@ class StepStart(Resource):
         if not CookBook.get_instance().selected_recipe:
             return jsonify({"error": 'No recipe selected'}), HTTPStatus.FAILED_DEPENDENCY
         try:
-            step = CookBook.get_instance().selected_recipe.steps[stepId]
+            step = CookBook.get_instance().selected_recipe.steps[int(stepId)]
         except IndexError:
             return jsonify({"error": 'Step not found'}), HTTPStatus.NOT_FOUND
 
