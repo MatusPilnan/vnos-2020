@@ -70,6 +70,7 @@ class Recipe(recipe.Recipe):
         miscs.sort(key=(lambda m: m.time), reverse=True)
 
         remaining_boil_time = int(recipe.boil_time)
+        dep = self.steps[-1]
         for i, hop in enumerate(recipe.hops):
             if hop.use == 'Boil':
                 while len(miscs) > 0 and miscs[0].time > hop.time:
@@ -77,8 +78,9 @@ class Recipe(recipe.Recipe):
                         self.steps.append(KeepTemperature(name='Boil',
                                                           duration=int(remaining_boil_time - miscs[0].time),
                                                           dependencies=[self.steps[-1]]))
+                        dep = [self.steps[-1]]
                     self.steps.append(AddMisc(name=miscs[0].name, amount=miscs[0].amount,
-                                              misc_type=miscs[0].type))
+                                              misc_type=miscs[0].type, dependencies=dep))
                     remaining_boil_time = miscs[0].time
                     miscs.pop(0)
 
@@ -86,9 +88,9 @@ class Recipe(recipe.Recipe):
                     self.steps.append(KeepTemperature(name='Boil',
                                                       duration=int(remaining_boil_time - hop.time),
                                                       dependencies=[self.steps[-1]]))
-
+                    dep = [self.steps[-1]]
                 self.steps.append(AddHop(name=hop.name, grams=int(hop.amount * 1000),
-                                         dependencies=[self.steps[-1], hop_boil_addition_deps[i]]))
+                                         dependencies=dep + [hop_boil_addition_deps[i]]))
                 remaining_boil_time = hop.time
 
         if remaining_boil_time > 0:

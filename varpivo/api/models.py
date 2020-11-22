@@ -1,7 +1,7 @@
 ingredient_model = {
     "type": "object",
     "title": "Ingredient",
-    "required": ["name", "amount"],
+    "required": ["name", "amount", "unit"],
     "properties": {
         "name": {
             "type": "string"

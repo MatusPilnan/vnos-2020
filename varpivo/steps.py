@@ -78,7 +78,7 @@ class SetTemperature(Step):
 class WeighIngredient(Step):
 
     def __init__(self, ingredient: str, grams: int, dependencies=None) -> None:
-        super().__init__(f'Weight {ingredient}: {grams}g', description=f'Weight {grams} grams of {ingredient}.',
+        super().__init__(f'Weight {ingredient}: {grams} g', description=f'Weight {grams} grams of {ingredient}.',
                          duration=3, dependencies=dependencies)
         self.grams = grams
 
