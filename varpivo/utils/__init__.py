@@ -12,3 +12,13 @@ def prepare_recipe_files(recipe_files):
 
         with open(file, 'w') as f:
             f.write(content)
+
+
+class Event:
+    STEP = "STEP"
+    WS = "WS"
+
+    def __init__(self, event_type, payload) -> None:
+        super().__init__()
+        self.event_type = event_type,
+        self.payload = payload
