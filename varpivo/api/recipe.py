@@ -55,8 +55,7 @@ class Recipe(Resource):
     async def post(self, recipeId):
 
         try:
-            if not CookBook.get_instance().selected_recipe:
-                CookBook.get_instance().selected_recipe = CookBook.get_instance()[recipeId]
+            if CookBook.get_instance().select_recipe(recipeId):
                 return jsonify({"steps": list(map(step_to_dict, CookBook.get_instance()[recipeId].steps))})
             else:
                 return jsonify({"error": 'Recipe already selected'}), HTTPStatus.CONFLICT
