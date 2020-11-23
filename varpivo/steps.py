@@ -19,6 +19,7 @@ class Step:
             dependencies = []
         self.description = description
         self.duration = duration
+        self.estimation = duration
         self.name = name
         self.dependencies = list(dependencies)
 
@@ -71,8 +72,8 @@ class SetTemperature(Step):
                          duration=target // 2, dependencies=dependencies)
         self.target = target
 
-    def start(self):
-        super().start()
+    async def start(self):
+        await super().start()
 
 
 class WeighIngredient(Step):
@@ -82,9 +83,9 @@ class WeighIngredient(Step):
                          duration=3, dependencies=dependencies)
         self.grams = grams
 
-    def stop(self):
+    async def stop(self):
         self.finished = time()
-        broadcast(jsonify(self.to_dict()))
+        await broadcast(jsonify(self.to_dict()))
 
 
 class KeepTemperature(Step):
@@ -93,11 +94,11 @@ class KeepTemperature(Step):
         super().__init__(name=name, description=f"Keep temperature for {duration} minutes.", duration=duration,
                          dependencies=dependencies)
 
-    def start(self):
-        super().start()
+    async def start(self):
+        await super().start()
 
-    def stop(self):
-        super().stop()
+    async def stop(self):
+        await super().stop()
 
 
 class AddHop(Step):

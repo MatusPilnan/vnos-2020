@@ -86,7 +86,7 @@ class StepStart(Resource):
         if not CookBook.get_instance().selected_recipe:
             return jsonify({"error": 'No recipe selected'}), HTTPStatus.FAILED_DEPENDENCY
         try:
-            step = CookBook.get_instance().selected_recipe.steps[stepId]
+            step = CookBook.get_instance().selected_recipe.steps[int(stepId)]
         except IndexError:
             return jsonify({"error": 'Step not found'}), HTTPStatus.NOT_FOUND
 
