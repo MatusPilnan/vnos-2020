@@ -8,6 +8,7 @@ from quart_openapi import Pint
 
 from main import loop
 from varpivo.hardware.scale import Scale
+from varpivo.hardware.thermometer import Thermometer
 from varpivo.utils import Event
 
 app = Pint(__name__, title="var:pivo API")
@@ -62,6 +63,13 @@ async def send_weight():
         await asyncio.sleep(0.5)
 
 
+async def send_temperature():
+    while True:
+        await broadcast(json.dumps({"payload": json.dumps(round(Thermometer.get_instance().temperature, 2)),
+                                    "content": "temperature"}))
+        await asyncio.sleep(0.5)
+
+
 async def observe():
     while True:
         event = await event_queue.get()
@@ -73,6 +81,7 @@ from varpivo.api import recipe
 from quart_openapi import OpenApiView
 
 asyncio.ensure_future(send_weight())
+asyncio.ensure_future(send_temperature())
 asyncio.ensure_future(observe())
 
 nieco = OpenApiView(app)
