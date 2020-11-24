@@ -5,7 +5,8 @@ from quart_openapi import Resource
 from quart_openapi.cors import crossdomain
 
 from varpivo import app
-from varpivo.api.models import recipe_model, step_model, ws_message_model, recipe_list_model, recipe_steps_model
+from varpivo.api.models import recipe_model, step_model, ws_message_model, recipe_list_model, recipe_steps_model, \
+    brew_session_model
 from varpivo.recipe import CookBook
 from varpivo.steps import Step
 
@@ -93,6 +94,17 @@ class StepStart(Resource):
             return jsonify({"error": 'Step not in progress'}), HTTPStatus.FAILED_DEPENDENCY
         await step.stop()
         return jsonify(step_to_dict(step))
+
+
+@app.route("/status")
+class BrewStatus(Resource):
+    @crossdomain('*')
+    @app.response(HTTPStatus.OK, description='OK', validator=app.create_validator('brew_session', brew_session_model))
+    async def get(self):
+        if not CookBook.get_instance().selected_recipe:
+            return jsonify({"error": 'No recipe selected'}), HTTPStatus.FAILED_DEPENDENCY
+        recipe = CookBook.get_instance().selected_recipe
+        return jsonify({"recipe": recipe.cookbook_entry, "steps": list(map(step_to_dict, recipe.steps))})
 
 
 @app.route("/brizolit/je/cesta/neprestrelna/vesta")

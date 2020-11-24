@@ -1,4 +1,5 @@
 import glob
+import os
 import shelve
 from os.path import basename, exists
 from typing import Dict, List
@@ -119,7 +120,7 @@ class CookBook:
     __instance = None
     selected_recipe = None
 
-    CHECKPOINT_FILE = "shelf.page"
+    CHECKPOINT_FILE = os.path.join("shelf", "shelf.page")
 
     @staticmethod
     def get_instance():

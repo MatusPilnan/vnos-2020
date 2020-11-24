@@ -100,14 +100,26 @@ ws_message_model = {
     }
 }
 
+step_list_property = {
+    'type': 'array',
+    'items': step_model
+}
+
 recipe_steps_model = {
     "type": "object",
     "title": "StepsList",
     "required": ["steps"],
     "properties": {
-        "steps": {
-            'type': 'array',
-            'items': step_model
-        }
+        "steps": step_list_property
+    }
+}
+
+brew_session_model = {
+    "type": "object",
+    "title": "BrewSession",
+    "required": ["steps", "recipe"],
+    "properties": {
+        "steps": step_list_property,
+        "recipe": recipe_model
     }
 }
