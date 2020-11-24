@@ -57,7 +57,7 @@ class Recipe(Resource):
 
         try:
             if CookBook.get_instance().select_recipe(recipeId):
-                return jsonify({"steps": list(map(step_to_dict, CookBook.get_instance()[recipeId].steps))})
+                return jsonify({"steps": list(map(step_to_dict, CookBook.get_instance()[recipeId].steps_list))})
             else:
                 return jsonify({"error": 'Recipe already selected'}), HTTPStatus.CONFLICT
         except KeyError:
@@ -73,7 +73,7 @@ class StepStart(Resource):
         if not CookBook.get_instance().selected_recipe:
             return jsonify({"error": 'No recipe selected'}), HTTPStatus.FAILED_DEPENDENCY
         try:
-            step = CookBook.get_instance().selected_recipe.steps[int(stepId)]
+            step = CookBook.get_instance().selected_recipe.steps[stepId]
         except IndexError:
             return jsonify({"error": 'Step not found'}), HTTPStatus.NOT_FOUND
         if not step.available:
@@ -86,7 +86,7 @@ class StepStart(Resource):
         if not CookBook.get_instance().selected_recipe:
             return jsonify({"error": 'No recipe selected'}), HTTPStatus.FAILED_DEPENDENCY
         try:
-            step = CookBook.get_instance().selected_recipe.steps[int(stepId)]
+            step = CookBook.get_instance().selected_recipe.steps[stepId]
         except IndexError:
             return jsonify({"error": 'Step not found'}), HTTPStatus.NOT_FOUND
 
@@ -104,7 +104,7 @@ class BrewStatus(Resource):
         if not CookBook.get_instance().selected_recipe:
             return jsonify({"error": 'No recipe selected'}), HTTPStatus.FAILED_DEPENDENCY
         recipe = CookBook.get_instance().selected_recipe
-        return jsonify({"recipe": recipe.cookbook_entry, "steps": list(map(step_to_dict, recipe.steps))})
+        return jsonify({"recipe": recipe.cookbook_entry, "steps": list(map(step_to_dict, recipe.steps_list))})
 
 
 @app.route("/brizolit/je/cesta/neprestrelna/vesta")

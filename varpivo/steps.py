@@ -1,4 +1,5 @@
 import json
+import uuid
 from time import time
 
 from quart import jsonify
@@ -18,6 +19,7 @@ class Step:
         super().__init__()
         if dependencies is None:
             dependencies = []
+        self.id = str(uuid.uuid4())
         self.description = description
         self.duration = duration
         self.estimation = duration
@@ -36,7 +38,8 @@ class Step:
         return not self.started
 
     def to_dict(self):
-        return {"started": self.started,
+        return {"id": self.id,
+                "started": self.started,
                 "finished": self.finished,
                 "progress": self.progress,
                 "estimation": self.estimation,

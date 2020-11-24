@@ -57,6 +57,9 @@ step_model = {
     'type': 'object',
     'title': 'RecipeStep',
     'properties': {
+        "id": {
+            "type": "string"
+        },
         "started": {
             "type": "number"
         },
@@ -83,7 +86,7 @@ step_model = {
             "type": "boolean"
         }
     },
-    "required": ["name", "available", "description"]
+    "required": ["name", "available", "description", "id"]
 }
 
 ws_message_model = {
