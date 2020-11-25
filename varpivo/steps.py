@@ -14,6 +14,8 @@ class Step:
     progress = None
     estimation = None
     next_step = None
+    kind = 'generic'
+    target = None
 
     def __init__(self, name: str, description: str, duration: int, dependencies=None) -> None:
         super().__init__()
@@ -46,7 +48,9 @@ class Step:
                 "description": self.description,
                 "duration": self.duration,
                 "name": self.name,
-                "available": self.available}
+                "available": self.available,
+                "kind": self.kind,
+                "target": self.target}
 
     def to_keg(self):
         return json.dumps({"payload": json.dumps(self.to_dict()), "content": "step"})
@@ -63,6 +67,7 @@ class Step:
 
 
 class AddWater(Step):
+    kind = 'water'
 
     def __init__(self, amount: int, dependencies=None) -> None:
         super().__init__(name=f'Add water: {amount:.2f} L', description=f'Add {amount:.2f} L water for infusion.',
@@ -70,6 +75,7 @@ class AddWater(Step):
 
 
 class SetTemperature(Step):
+    kind = 'set_temperature'
 
     def __init__(self, target: int, dependencies=None) -> None:
         super().__init__(name=f'Heat water: {target:.2f} C', description=f'Heat water to {target:.2f}°C.',
@@ -81,11 +87,12 @@ class SetTemperature(Step):
 
 
 class WeighIngredient(Step):
+    kind = 'weight'
 
     def __init__(self, ingredient: str, grams: int, dependencies=None) -> None:
         super().__init__(f'Weight {ingredient}: {grams} g', description=f'Weight {grams} grams of {ingredient}.',
                          duration=3, dependencies=dependencies)
-        self.grams = grams
+        self.target = grams
 
     async def stop(self):
         self.finished = time()
@@ -93,6 +100,7 @@ class WeighIngredient(Step):
 
 
 class KeepTemperature(Step):
+    kind = 'keep_temperature'
 
     def __init__(self, name: str, duration: int, dependencies=None) -> None:
         super().__init__(name=name, description=f"Keep temperature for {duration} minutes.", duration=duration,
@@ -106,6 +114,7 @@ class KeepTemperature(Step):
 
 
 class AddHop(Step):
+    kind = 'hop'
 
     def __init__(self, name: str, grams: int, dependencies=None) -> None:
         super().__init__(name=f'Add hops: {name}', description=f'Add {grams} grams of {name} hops.', duration=1,
@@ -113,6 +122,8 @@ class AddHop(Step):
 
 
 class AddMisc(Step):
+    kind = 'misc'
+
     def __init__(self, name: str, amount: float, misc_type: str, dependencies=None) -> None:
         super().__init__(name=f'Add {name}', description=f'Add {amount:.2f} units of {name} ({misc_type})', duration=1,
                          dependencies=dependencies)

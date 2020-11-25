@@ -84,9 +84,16 @@ step_model = {
         },
         "available": {
             "type": "boolean"
+        },
+        "kind": {
+            "type": "string",
+            "default": "generic"
+        },
+        "target": {
+            "type": "number"
         }
     },
-    "required": ["name", "available", "description", "id"]
+    "required": ["name", "available", "description", "id", "kind"]
 }
 
 ws_message_model = {

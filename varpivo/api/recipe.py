@@ -68,6 +68,7 @@ class Recipe(Resource):
 @app.param("stepId", "Step ID", "path", required=True)
 @app.route('/step/<stepId>')
 class StepStart(Resource):
+    @crossdomain("*")
     @app.response(HTTPStatus.OK, description="", validator=recipe_step)
     async def post(self, stepId):
         if not CookBook.get_instance().selected_recipe:
@@ -81,6 +82,7 @@ class StepStart(Resource):
         await step.start()
         return jsonify(step_to_dict(step))
 
+    @crossdomain("*")
     @app.response(HTTPStatus.OK, description="", validator=recipe_step)
     async def delete(self, stepId):
         if not CookBook.get_instance().selected_recipe:
