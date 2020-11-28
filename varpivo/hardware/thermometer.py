@@ -1,23 +1,22 @@
 from random import random
 
-try:
-    from w1thermsensor import W1ThermSensor
-    from RPi import GPIO
-except ModuleNotFoundError:
-    emulate = True
-    print('No modules for thermometer found. Using emulated thermometer.')
+from w1thermsensor import W1ThermSensor, NoSensorFoundError
 
 
 class Thermometer:
     __instance = None
 
     @staticmethod
-    def get_instance():
+    def get_instance(emulate=False):
         if Thermometer.__instance is None:
             if emulate:
                 EmulatedThermometer()
             else:
-                Thermometer()
+                try:
+                    Thermometer()
+                except NoSensorFoundError as e:
+                    print(e)
+                    EmulatedThermometer()
 
         return Thermometer.__instance
 
@@ -26,14 +25,22 @@ class Thermometer:
         if Thermometer.__instance is not None:
             raise Exception("This class is a singleton!")
         else:
+            self.sensor = None
+            self.init_sensor()
             Thermometer.__instance = self
+
+    def init_sensor(self):
+        if not self.sensor:
+            self.sensor = W1ThermSensor()
 
     @property
     def temperature(self):
-        raise NotImplementedError
+        return self.sensor.get_temperature()
 
 
 class EmulatedThermometer(Thermometer):
+    def init_sensor(self):
+        print('Using emulated thermometer!')
 
     @property
     def temperature(self):

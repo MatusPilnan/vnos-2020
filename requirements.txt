@@ -7,5 +7,9 @@ termcolor~=1.1.0
 git+https://github.com/tatobari/hx711py.git
 
 Quart~=0.13.1
+quart_openapi
 
 actorio~=0.1.4
+
+hx711~=0.1
+w1thermsensor~=2.0.0a2
