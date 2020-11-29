@@ -66,7 +66,7 @@ class Recipe(Resource):
 
 # noinspection PyUnresolvedReferences,PyPep8Naming
 @app.param("stepId", "Step ID", "path", required=True)
-@app.route('/step/<stepId>')
+@app.route('/step/<stepId>/start')
 class StepStart(Resource):
     @crossdomain("*")
     @app.response(HTTPStatus.OK, description="", validator=recipe_step)
@@ -82,9 +82,14 @@ class StepStart(Resource):
         await step.start()
         return jsonify(step_to_dict(step))
 
+
+# noinspection PyUnresolvedReferences,PyPep8Naming
+@app.param("stepId", "Step ID", "path", required=True)
+@app.route('/step/<stepId>/stop')
+class StepFinish(Resource):
     @crossdomain("*")
     @app.response(HTTPStatus.OK, description="", validator=recipe_step)
-    async def delete(self, stepId):
+    async def post(self, stepId):
         if not CookBook.get_instance().selected_recipe:
             return jsonify({"error": 'No recipe selected'}), HTTPStatus.FAILED_DEPENDENCY
         try:
