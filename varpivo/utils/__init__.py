@@ -15,6 +15,7 @@ def prepare_recipe_files(recipe_files):
 
 
 class Event:
+    CALIBRATION_READY = "CALIBRATION_READY"
     STEP = "STEP"
     WS = "WS"
 

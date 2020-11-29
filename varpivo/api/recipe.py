@@ -1,13 +1,15 @@
+import json
 from http import HTTPStatus
 
 from quart import jsonify, request
 from quart_openapi import Resource
 
-from varpivo import app, Scale
+from varpivo import app, Scale, event_queue
 from varpivo.api.models import recipe_model, step_model, ws_message_model, recipe_list_model, recipe_steps_model, \
     brew_session_model
 from varpivo.recipe import CookBook
 from varpivo.steps import Step
+from varpivo.utils import Event
 
 
 @app.route("/recipe")
@@ -100,6 +102,29 @@ class BrewStatus(Resource):
             return jsonify({"error": 'No recipe selected'}), HTTPStatus.FAILED_DEPENDENCY
         recipe = CookBook.get_instance().selected_recipe
         return jsonify({"recipe": recipe.cookbook_entry, "steps": list(map(step_to_dict, recipe.steps_list))})
+
+
+@app.route("/scale")
+class ScaleRes(Resource):
+    @app.param('grams', description='Real weight used for calibration', required=True, schema={"type": "integer"})
+    async def patch(self):
+        """Start scale calibration"""
+        weight = request.args['grams']
+        Scale.get_instance().start_calibration(int(weight))
+        await event_queue.put(Event(Event.WS, payload=json.dumps({"content": "calibration", "payload": "ready"})))
+        return jsonify({}), HTTPStatus.NO_CONTENT
+
+    async def put(self):
+        """Find scale reference units, after weight was PUT on the scale"""
+        if not Scale.get_instance().calibrating:
+            return jsonify({"error": 'Calibration not started'}), HTTPStatus.FAILED_DEPENDENCY
+        await event_queue.put(Event(Event.CALIBRATION_READY, payload=None))
+        return jsonify({}), HTTPStatus.NO_CONTENT
+
+    async def delete(self):
+        """Tare the scale"""
+        Scale.get_instance().tare()
+        return jsonify({}), HTTPStatus.NO_CONTENT
 
 
 @app.route("/brizolit/je/cesta/neprestrelna/vesta")
