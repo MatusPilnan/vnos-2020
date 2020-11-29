@@ -103,6 +103,8 @@ class Scale:
         with open(SCALE_CALIBRATION_FILE, 'w') as f:
             json.dump(reference_values, f)
         self.calibrating = False
+        from varpivo import event_queue
+        await event_queue.put(Event(Event.WS, payload=json.dumps({"content": "calibration", "payload": "done"})))
 
     @staticmethod
     async def calibration_observer(event):
