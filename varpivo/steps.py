@@ -2,9 +2,7 @@ import json
 import uuid
 from time import time
 
-from quart import jsonify
-
-from varpivo import broadcast, event_queue
+from varpivo import event_queue
 from varpivo.utils import Event
 
 
@@ -96,7 +94,7 @@ class WeighIngredient(Step):
 
     async def stop(self):
         self.finished = time()
-        await broadcast(jsonify(self.to_dict()))
+        await event_queue.put(Event(Event.STEP, payload=self))
 
 
 class KeepTemperature(Step):
