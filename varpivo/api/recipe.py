@@ -1,10 +1,9 @@
 from http import HTTPStatus
 
-from quart import jsonify
+from quart import jsonify, request
 from quart_openapi import Resource
-from quart_openapi.cors import crossdomain
 
-from varpivo import app
+from varpivo import app, Scale
 from varpivo.api.models import recipe_model, step_model, ws_message_model, recipe_list_model, recipe_steps_model, \
     brew_session_model
 from varpivo.recipe import CookBook
@@ -14,7 +13,6 @@ from varpivo.steps import Step
 @app.route("/recipe")
 class RecipeList(Resource):
     @app.response(HTTPStatus.OK, description="", validator=app.create_validator('recipe_list', recipe_list_model))
-    @crossdomain("*")
     async def get(self):
         '''Retrieve all available recipes
 
@@ -38,7 +36,6 @@ recipe_steps = app.create_validator('recipe_steps', recipe_steps_model)
 @app.route('/recipe/<recipeId>')
 class Recipe(Resource):
 
-    @crossdomain("*")
     @app.response(HTTPStatus.NOT_FOUND, "Recipe not found")
     @app.response(HTTPStatus.OK, description="Returns a signle recipe",
                   validator=app.create_validator('recipe', recipe_model))
@@ -48,7 +45,6 @@ class Recipe(Resource):
         except KeyError:
             return jsonify({"error": 'Recipe not found'}), HTTPStatus.NOT_FOUND
 
-    @crossdomain("*")
     @app.response(HTTPStatus.NOT_FOUND, "Recipe not found")
     @app.response(HTTPStatus.CONFLICT, "Recipe already selected")
     @app.response(HTTPStatus.OK, description="",
@@ -66,9 +62,8 @@ class Recipe(Resource):
 
 # noinspection PyUnresolvedReferences,PyPep8Naming
 @app.param("stepId", "Step ID", "path", required=True)
-@app.route('/step/<stepId>/start')
+@app.route('/step/<stepId>')
 class StepStart(Resource):
-    @crossdomain("*")
     @app.response(HTTPStatus.OK, description="", validator=recipe_step)
     async def post(self, stepId):
         if not CookBook.get_instance().selected_recipe:
@@ -82,14 +77,8 @@ class StepStart(Resource):
         await step.start()
         return jsonify(step_to_dict(step))
 
-
-# noinspection PyUnresolvedReferences,PyPep8Naming
-@app.param("stepId", "Step ID", "path", required=True)
-@app.route('/step/<stepId>/stop')
-class StepFinish(Resource):
-    @crossdomain("*")
     @app.response(HTTPStatus.OK, description="", validator=recipe_step)
-    async def post(self, stepId):
+    async def delete(self, stepId):
         if not CookBook.get_instance().selected_recipe:
             return jsonify({"error": 'No recipe selected'}), HTTPStatus.FAILED_DEPENDENCY
         try:
@@ -105,7 +94,6 @@ class StepFinish(Resource):
 
 @app.route("/status")
 class BrewStatus(Resource):
-    @crossdomain('*')
     @app.response(HTTPStatus.OK, description='OK', validator=app.create_validator('brew_session', brew_session_model))
     async def get(self):
         if not CookBook.get_instance().selected_recipe:

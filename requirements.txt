@@ -8,6 +8,7 @@ git+https://github.com/tatobari/hx711py.git
 
 Quart~=0.13.1
 quart_openapi
+quart_cors
 
 actorio~=0.1.4
 

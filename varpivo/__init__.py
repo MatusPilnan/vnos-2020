@@ -3,7 +3,9 @@ import json
 from asyncio import Queue
 from functools import wraps
 
+from RPi import GPIO
 from quart import websocket
+from quart_cors import cors
 from quart_openapi import Pint
 
 from main import loop
@@ -12,7 +14,8 @@ from varpivo.hardware.thermometer import Thermometer
 from varpivo.utils import Event
 
 app = Pint(__name__, title="var:pivo API")
-app.config['SERVER_NAME'] = "127.0.0.1:5000"
+app.config['SERVER_NAME'] = "192.168.1.13:5000"
+app = cors(app, allow_origin='*')
 
 
 @app.route('/')
