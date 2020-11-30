@@ -1,1 +1,3 @@
 RECIPES_DIR = 'recipes'
+SCALE_CALIBRATION_FILE = 'scale_calibration.json'
+SCALE_CALIBRATION_ERROR_THRESHOLD = 50

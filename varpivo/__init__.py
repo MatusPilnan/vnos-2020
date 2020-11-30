@@ -30,7 +30,7 @@ async def ws_observer(event):
 
 connected_websockets = set()
 event_queue = Queue(loop=loop)
-event_observers = {ws_observer}
+event_observers = {ws_observer, Scale.calibration_observer}
 
 
 def collect_websocket(func):
@@ -62,7 +62,8 @@ async def broadcast(message):
 
 async def send_weight():
     while True:
-        await broadcast(json.dumps({"payload": json.dumps(round(Scale.get_instance().weight, 2)), "content": "weight"}))
+        weight = await Scale.get_instance().weight
+        await broadcast(json.dumps({"payload": json.dumps(int(weight)), "content": "weight"}))
         await asyncio.sleep(0.5)
 
 
@@ -78,6 +79,12 @@ async def observe():
         event = await event_queue.get()
         for observer in event_observers:
             await observer(event)
+
+
+@app.after_serving
+async def shutdown():
+    print('Cleaning up...')
+    GPIO.cleanup()
 
 
 from varpivo.api import recipe
