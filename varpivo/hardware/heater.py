@@ -43,7 +43,7 @@ class EmulatedHeater(Heater):
     # noinspection PyMissingConstructor
     def __init__(self):
         print('Using emulated heater!')
-        pass
+        self._heat = False
 
     @property
     def heat(self):
