@@ -6,7 +6,7 @@ from quart_openapi import Resource
 
 from varpivo import app, Scale, event_queue
 from varpivo.api.models import recipe_model, step_model, ws_message_model, recipe_list_model, recipe_steps_model, \
-    brew_session_model
+    brew_session_model, ws_temperature_model
 from varpivo.recipe import CookBook
 from varpivo.steps import Step
 from varpivo.utils import Event
@@ -131,4 +131,9 @@ class ScaleRes(Resource):
 class WebSocketKeg(Resource):
     @app.response(HTTPStatus.OK, description="Tatrofkaaaaaa", validator=app.create_validator('wskeg', ws_message_model))
     def get(self):
+        return jsonify({""}, HTTPStatus.IM_A_TEAPOT)
+
+    @app.response(HTTPStatus.OK, description="ZonickaaaAAA",
+                  validator=app.create_validator('temperature', ws_temperature_model))
+    def post(self):
         return jsonify({""}, HTTPStatus.IM_A_TEAPOT)

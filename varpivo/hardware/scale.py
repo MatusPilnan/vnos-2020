@@ -3,9 +3,6 @@ import json
 from random import random
 from statistics import mean
 
-# noinspection PyPackageRequirements
-from hx711 import HX711
-
 from varpivo.config.config import SCALE_CALIBRATION_FILE, SCALE_CALIBRATION_ERROR_THRESHOLD
 from varpivo.utils import Event
 
@@ -16,17 +13,19 @@ class Scale:
     calibrating = False
 
     @staticmethod
-    def get_instance(emulate=False):
+    def get_instance():
         if Scale.__instance is None:
-            if emulate:
-                EmulatedScale()
-            else:
+            try:
                 Scale()
+            except ModuleNotFoundError:
+                Scale.__instance = EmulatedScale()
 
         return Scale.__instance
 
     def __init__(self) -> None:
         super().__init__()
+        # noinspection PyUnresolvedReferences
+        from hx711 import HX711
         if Scale.__instance is not None:
             raise Exception("This class is a singleton!")
         else:
@@ -114,11 +113,15 @@ class Scale:
 
 class EmulatedScale(Scale):
 
+    # noinspection PyMissingConstructor
+    def __init__(self) -> None:
+        pass
+
     def init_sensor(self):
         pass
 
     @property
-    def weight(self):
+    async def weight(self):
         return random() * 100
 
     def tare(self):

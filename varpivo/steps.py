@@ -3,6 +3,7 @@ import uuid
 from time import time
 
 from varpivo import event_queue
+from varpivo.kettle import Kettle
 from varpivo.utils import Event
 
 
@@ -11,7 +12,7 @@ class Step:
     finished = None
     progress = None
     estimation = None
-    next_step = None
+    next_steps = []
     kind = 'generic'
     target = None
 
@@ -27,8 +28,7 @@ class Step:
         self.dependencies = list(dependencies)
 
         for dependency in dependencies:
-            if not isinstance(dependency, WeighIngredient):
-                dependency.next_step = self
+            dependency.next_steps.append(self)
 
     @property
     def available(self):
@@ -60,8 +60,9 @@ class Step:
     async def stop(self):
         self.finished = time()
         await event_queue.put(Event(Event.STEP, payload=self))
-        if self.next_step.available:
-            await self.next_step.start()
+        for next_step in self.next_steps:
+            if next_step.available:
+                await next_step.start()
 
 
 class AddWater(Step):
@@ -81,7 +82,21 @@ class SetTemperature(Step):
         self.target = target
 
     async def start(self):
+        Kettle.get_instance().target_temperature = self.target
+        Kettle.get_instance().observing_steps.add(self.id)
         await super().start()
+
+    async def stop(self):
+        Kettle.get_instance().observing_steps.remove(self.id)
+        return await super().stop()
+
+    async def observe_kettle(self, temperature):
+        if temperature >= self.target:
+            await self.stop()
+        else:
+            if self.progress != temperature:
+                self.progress = temperature / self.target
+                await event_queue.put(Event(Event.STEP, payload=self))
 
 
 class WeighIngredient(Step):
@@ -92,10 +107,6 @@ class WeighIngredient(Step):
                          duration=3, dependencies=dependencies)
         self.target = grams
 
-    async def stop(self):
-        self.finished = time()
-        await event_queue.put(Event(Event.STEP, payload=self))
-
 
 class KeepTemperature(Step):
     kind = 'keep_temperature'
@@ -103,12 +114,24 @@ class KeepTemperature(Step):
     def __init__(self, name: str, duration: int, dependencies=None) -> None:
         super().__init__(name=name, description=f"Keep temperature for {duration} minutes.", duration=duration,
                          dependencies=dependencies)
+        self.target = time() + duration * 60
 
     async def start(self):
+        Kettle.get_instance().observing_steps.add(self.id)
         await super().start()
 
     async def stop(self):
-        await super().stop()
+        Kettle.get_instance().observing_steps.remove(self.id)
+        return await super().stop()
+
+    async def observe_kettle(self, temperature):
+        if time() >= self.target:
+            await self.stop()
+        else:
+            p = round((time() - self.started) / (self.target - self.started), 2)
+            if self.progress != p:
+                self.progress = p
+                await event_queue.put(Event(Event.STEP, payload=self))
 
 
 class AddHop(Step):

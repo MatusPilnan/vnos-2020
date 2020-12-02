@@ -3,18 +3,18 @@ import json
 from asyncio import Queue
 from functools import wraps
 
-from RPi import GPIO
 from quart import websocket
 from quart_cors import cors
 from quart_openapi import Pint
 
 from main import loop
+from varpivo.hardware.heater import Heater
 from varpivo.hardware.scale import Scale
 from varpivo.hardware.thermometer import Thermometer
 from varpivo.utils import Event
 
 app = Pint(__name__, title="var:pivo API")
-app.config['SERVER_NAME'] = "192.168.1.13:5000"
+app.config['SERVER_NAME'] = "127.0.0.1:5000"
 app = cors(app, allow_origin='*')
 
 
@@ -69,7 +69,8 @@ async def send_weight():
 
 async def send_temperature():
     while True:
-        await broadcast(json.dumps({"payload": json.dumps(round(Thermometer.get_instance().temperature, 2)),
+        await broadcast(json.dumps({"payload": json.dumps(
+            {"temperature": round(Thermometer.get_instance().temperature), "heating": Heater.get_instance().heat}),
                                     "content": "temperature"}))
         await asyncio.sleep(0.5)
 
@@ -84,7 +85,11 @@ async def observe():
 @app.after_serving
 async def shutdown():
     print('Cleaning up...')
-    GPIO.cleanup()
+    try:
+        from RPi import GPIO
+        GPIO.cleanup()
+    except ModuleNotFoundError:
+        print("Or maybe not...")
 
 
 from varpivo.api import recipe

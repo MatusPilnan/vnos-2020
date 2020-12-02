@@ -1,22 +1,20 @@
 from random import random
 
-from w1thermsensor import W1ThermSensor, NoSensorFoundError
-
 
 class Thermometer:
     __instance = None
 
     @staticmethod
-    def get_instance(emulate=False):
+    def get_instance():
         if Thermometer.__instance is None:
-            if emulate:
+            try:
+                from w1thermsensor import W1ThermSensor, NoSensorFoundError
+                Thermometer()
+            except ModuleNotFoundError:
                 EmulatedThermometer()
-            else:
-                try:
-                    Thermometer()
-                except NoSensorFoundError as e:
-                    print(e)
-                    EmulatedThermometer()
+            except NoSensorFoundError as e:
+                print(e)
+                EmulatedThermometer()
 
         return Thermometer.__instance
 

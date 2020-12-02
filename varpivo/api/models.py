@@ -110,6 +110,20 @@ ws_message_model = {
     }
 }
 
+ws_temperature_model = {
+    "type": "object",
+    "title": "Temperature",
+    "required": ["temperature", "heating"],
+    "properties": {
+        "temperature": {
+            "type": "number"
+        },
+        "heating": {
+            "type": "boolean"
+        }
+    }
+}
+
 step_list_property = {
     'type': 'array',
     'items': step_model

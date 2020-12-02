@@ -58,7 +58,7 @@ class Recipe(recipe.Recipe):
             steps.append(SetTemperature(target=int(ms.step_temp), dependencies=[steps[-1]]))
             if i == 0:
                 steps.append(Step(name='Add malts', description='Add the malts', duration=5,
-                                  dependencies=steps[:mash_fermentable_count]))
+                                  dependencies=steps[:mash_fermentable_count] + [steps[-1]]))
             steps.append(KeepTemperature(name=ms.name, duration=int(ms.step_time), dependencies=[steps[-1]]))
 
         steps.append(Step(name='Mashout', description='Take the mash out of the kettle', duration=2,
