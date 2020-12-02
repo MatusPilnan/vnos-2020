@@ -114,9 +114,9 @@ class KeepTemperature(Step):
     def __init__(self, name: str, duration: int, dependencies=None) -> None:
         super().__init__(name=name, description=f"Keep temperature for {duration} minutes.", duration=duration,
                          dependencies=dependencies)
-        self.target = time() + duration * 60
 
     async def start(self):
+        self.target = time() + self.duration * 60
         Kettle.get_instance().observing_steps.add(self.id)
         await super().start()
 

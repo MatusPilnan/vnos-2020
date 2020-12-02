@@ -35,6 +35,7 @@ class Scale:
 
     def init_sensor(self):
         if not self.hx:
+            from hx711 import HX711
             self.hx = HX711(5, 6)
             try:
                 with open(SCALE_CALIBRATION_FILE) as f:
@@ -115,6 +116,7 @@ class EmulatedScale(Scale):
 
     # noinspection PyMissingConstructor
     def __init__(self) -> None:
+        print('Using emulated scale!')
         pass
 
     def init_sensor(self):

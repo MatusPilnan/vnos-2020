@@ -29,6 +29,7 @@ class Thermometer:
 
     def init_sensor(self):
         if not self.sensor:
+            from w1thermsensor import W1ThermSensor
             self.sensor = W1ThermSensor()
 
     @property
