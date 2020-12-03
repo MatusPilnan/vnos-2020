@@ -90,7 +90,8 @@ class StepStart(Resource):
 
         if not step.started:
             return jsonify({"error": 'Step not in progress'}), HTTPStatus.FAILED_DEPENDENCY
-        await step.stop()
+        if not step.finished:
+            await step.stop()
         return jsonify(step_to_dict(step))
 
 

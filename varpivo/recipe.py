@@ -5,12 +5,12 @@ from os.path import basename, exists
 from typing import Dict, List
 
 from pybeerxml import recipe
-from pybeerxml.parser import Parser
 
 from varpivo import event_observers
-from varpivo.config.config import RECIPES_DIR
+from varpivo.config.config import RECIPES_DIR, DEFAULT_MASH_STEP_TIME
 from varpivo.steps import *
 from varpivo.utils import prepare_recipe_files
+from varpivo.utils.BeerXMLUnicodeParser import BeerXMLUnicodeParser
 
 
 class Recipe(recipe.Recipe):
@@ -51,6 +51,8 @@ class Recipe(recipe.Recipe):
                 hop_boil_addition_deps.append(step)
 
         for i, ms in enumerate(recipe.mash.steps):
+            if not ms.step_time:
+                ms.step_time = DEFAULT_MASH_STEP_TIME
             if i == 0:
                 steps.append(AddWater(amount=int(ms.infuse_amount), dependencies=[]))
             else:
@@ -74,9 +76,11 @@ class Recipe(recipe.Recipe):
         miscs.sort(key=(lambda m: m.time), reverse=True)
 
         remaining_boil_time = int(recipe.boil_time)
-        dep = steps[-1]
-        for i, hop in enumerate(recipe.hops):
+        dep = [steps[-1]]
+        i = -1
+        for hop in recipe.hops:
             if hop.use == 'Boil':
+                i += 1
                 while len(miscs) > 0 and miscs[0].time > hop.time:
                     if miscs[0].time != remaining_boil_time:
                         steps.append(KeepTemperature(name='Boil',
@@ -88,7 +92,7 @@ class Recipe(recipe.Recipe):
                     remaining_boil_time = miscs[0].time
                     miscs.pop(0)
 
-                if miscs[0].time != remaining_boil_time:
+                if hop.time != remaining_boil_time and (not miscs or miscs[0].time != remaining_boil_time):
                     steps.append(KeepTemperature(name='Boil',
                                                  duration=int(remaining_boil_time - hop.time),
                                                  dependencies=[steps[-1]]))
@@ -153,7 +157,7 @@ class CookBook:
 
         event_observers.add(CookBook.step_observer)
         self.check_checkpoint()
-        parser = Parser()
+        parser = BeerXMLUnicodeParser()
         path = RECIPES_DIR
         prepare_recipe_files(glob.glob(f"{path}/*.xml"))
         self.recipes: Dict[Recipe] = {}
