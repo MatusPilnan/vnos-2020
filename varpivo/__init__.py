@@ -51,6 +51,10 @@ def collect_websocket(func):
 @app.websocket('/tap')
 @collect_websocket
 async def ws(queue):
+    _, message = await weight_to_keg()
+    await websocket.send(message)
+    _, _, message = await temperature_to_keg()
+    await websocket.send(message)
     while True:
         data = await queue.get()
         await websocket.send(data)
@@ -62,22 +66,39 @@ async def broadcast(message):
 
 
 async def send_weight():
+    last_reading = None
     while True:
-        weight = await Scale.get_instance().weight
-        Display.get_instance().weight = int(weight)
-        await broadcast(json.dumps({"payload": json.dumps(int(weight)), "content": "weight"}))
+        weight, message = await weight_to_keg()
+        if last_reading != weight:
+            Display.get_instance().weight = weight
+            await broadcast(message)
+            last_reading = weight
         await asyncio.sleep(0.5)
+
+
+async def weight_to_keg():
+    weight = int(await Scale.get_instance().weight)
+    return weight, json.dumps({"payload": json.dumps(weight), "content": "weight"})
 
 
 async def send_temperature():
+    last_reading = None
     while True:
-        temperature = round(Thermometer.get_instance().temperature)
-        heating = Heater.get_instance().heat
-        Display.get_instance().temperature = temperature
-        Display.get_instance().heating = heating
-        await broadcast(json.dumps({"payload": json.dumps({"temperature": temperature, "heating": heating}),
-                                    "content": "temperature"}))
+        temperature, heating, message = await temperature_to_keg()
+        if (temperature, heating) != last_reading:
+            Display.get_instance().temperature = temperature
+            Display.get_instance().heating = heating
+            await broadcast(message)
+            last_reading = (temperature, heating)
         await asyncio.sleep(0.5)
+
+
+async def temperature_to_keg():
+    temperature = round(Thermometer.get_instance().temperature)
+    heating = Heater.get_instance().heat
+    message = json.dumps({"payload": json.dumps({"temperature": temperature, "heating": heating}),
+                          "content": "temperature"})
+    return temperature, heating, message
 
 
 async def observe():
