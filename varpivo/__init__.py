@@ -8,6 +8,7 @@ from quart_cors import cors
 from quart_openapi import Pint
 
 from main import loop
+from varpivo.hardware.display import Display
 from varpivo.hardware.heater import Heater
 from varpivo.hardware.scale import Scale
 from varpivo.hardware.thermometer import Thermometer
@@ -63,14 +64,18 @@ async def broadcast(message):
 async def send_weight():
     while True:
         weight = await Scale.get_instance().weight
+        Display.get_instance().weight = int(weight)
         await broadcast(json.dumps({"payload": json.dumps(int(weight)), "content": "weight"}))
         await asyncio.sleep(0.5)
 
 
 async def send_temperature():
     while True:
-        await broadcast(json.dumps({"payload": json.dumps(
-            {"temperature": round(Thermometer.get_instance().temperature), "heating": Heater.get_instance().heat}),
+        temperature = round(Thermometer.get_instance().temperature)
+        heating = Heater.get_instance().heat
+        Display.get_instance().temperature = temperature
+        Display.get_instance().heating = heating
+        await broadcast(json.dumps({"payload": json.dumps({"temperature": temperature, "heating": heating}),
                                     "content": "temperature"}))
         await asyncio.sleep(0.5)
 

@@ -12,3 +12,4 @@ quart_cors
 
 hx711~=0.1
 w1thermsensor~=2.0.0a2
+luma
