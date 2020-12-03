@@ -32,6 +32,10 @@ class Kettle:
             temp = Thermometer.get_instance().temperature
             Heater.get_instance().heat = self.target_temperature > temp
             steps = set(self.observing_steps)
+            if not CookBook.get_instance().selected_recipe:
+                self.target_temperature = 0
+                del Kettle.__instance
+                return
             for observer in steps:
                 await CookBook.get_instance().selected_recipe.steps[observer].observe_kettle(temp)
             await asyncio.sleep(1)

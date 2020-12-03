@@ -104,6 +104,12 @@ class BrewStatus(Resource):
         recipe = CookBook.get_instance().selected_recipe
         return jsonify({"recipe": recipe.cookbook_entry, "steps": list(map(step_to_dict, recipe.steps_list))})
 
+    @app.response(HTTPStatus.OK, description='OK', validator=app.create_validator('brew_session', brew_session_model))
+    async def delete(self):
+        """Reset state - unselect any selected recipe"""
+        CookBook.get_instance().selected_recipe = None
+        return jsonify({"recipe": None, "steps": []})
+
 
 @app.route("/scale")
 class ScaleRes(Resource):
