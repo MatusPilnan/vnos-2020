@@ -64,6 +64,10 @@ class Step:
             if next_step.available:
                 await next_step.start()
 
+    def reset(self):
+        self.started = None
+        self.finished = None
+
 
 class AddWater(Step):
     kind = 'water'
@@ -132,6 +136,10 @@ class KeepTemperature(Step):
             if self.progress != p:
                 self.progress = p
                 await event_queue.put(Event(Event.STEP, payload=self))
+
+    def reset(self):
+        super().reset()
+        self.target = None
 
 
 class AddHop(Step):

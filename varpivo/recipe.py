@@ -128,6 +128,10 @@ class Recipe(recipe.Recipe):
     def to_checkpoint(self):
         return self
 
+    def __iter__(self):
+        for step in self.steps_list:
+            yield step
+
 
 class CookBook:
     __instance = None
@@ -173,7 +177,10 @@ class CookBook:
         return True
 
     def unselect_recipe(self):
-        self.selected_recipe = None
+        if self.selected_recipe:
+            for step in self.selected_recipe:
+                step.reset()
+            self.selected_recipe = None
         try:
             rmtree(CHECKPOINT_DIR)
         except FileNotFoundError:
