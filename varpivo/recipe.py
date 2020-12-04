@@ -1,16 +1,16 @@
 import glob
-import os
-import shelve
-from os.path import basename, exists
+from os.path import basename
+from shutil import rmtree
 from typing import Dict, List
 
 from pybeerxml import recipe
 
 from varpivo import event_observers
-from varpivo.config.config import RECIPES_DIR, DEFAULT_MASH_STEP_TIME
+from varpivo.config.config import RECIPES_DIR, DEFAULT_MASH_STEP_TIME, CHECKPOINT_DIR
 from varpivo.steps import *
 from varpivo.utils import prepare_recipe_files
 from varpivo.utils.BeerXMLUnicodeParser import BeerXMLUnicodeParser
+from varpivo.utils.librarian import get_selected_recipe, save_selected_recipe
 
 
 class Recipe(recipe.Recipe):
@@ -133,7 +133,6 @@ class CookBook:
     __instance = None
     selected_recipe = None
 
-    CHECKPOINT_FILE = os.path.join("shelf", "shelf.page")
 
     @staticmethod
     def get_instance():
@@ -156,7 +155,7 @@ class CookBook:
             CookBook.__instance = self
 
         event_observers.add(CookBook.step_observer)
-        self.check_checkpoint()
+        self.load_checkpoint()
         parser = BeerXMLUnicodeParser()
         path = RECIPES_DIR
         prepare_recipe_files(glob.glob(f"{path}/*.xml"))
@@ -173,28 +172,28 @@ class CookBook:
         self.selected_recipe = self[recipeId]
         return True
 
+    def unselect_recipe(self):
+        self.selected_recipe = None
+        try:
+            rmtree(CHECKPOINT_DIR)
+        except FileNotFoundError:
+            pass
+
     def __getitem__(self, item) -> Recipe:
         return self.recipes[item]
 
-    def check_checkpoint(self):
-        if not exists(self.CHECKPOINT_FILE):
-            return
-        checkpoint = shelve.open(self.CHECKPOINT_FILE)
-        self.checkpoint = {"recipe": checkpoint["recipe"], "time": checkpoint["time"]}
-        checkpoint.close()
-
     def load_checkpoint(self):
-        if self.checkpoint:
-            self.selected_recipe = self.checkpoint["recipe"]
+        checkpoint = get_selected_recipe()
+        if not checkpoint:
+            return False
+        if checkpoint:
+            self.selected_recipe = checkpoint["recipe"]
             return True
         return False
 
     def save_checkpoint(self):
         if self.selected_recipe:
-            checkpoint = shelve.open(self.CHECKPOINT_FILE)
-            checkpoint["recipe"] = self.selected_recipe.to_checkpoint()
-            checkpoint["time"] = time()
-            checkpoint.close()
+            save_selected_recipe(self.selected_recipe)
             return True
         return False
 

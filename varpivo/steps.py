@@ -12,7 +12,6 @@ class Step:
     finished = None
     progress = None
     estimation = None
-    next_steps = []
     kind = 'generic'
     target = None
 
@@ -26,6 +25,7 @@ class Step:
         self.estimation = duration
         self.name = name
         self.dependencies = list(dependencies)
+        self.next_steps = list()
 
         for dependency in dependencies:
             dependency.next_steps.append(self)
