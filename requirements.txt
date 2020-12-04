@@ -9,6 +9,7 @@ git+https://github.com/tatobari/hx711py.git
 Quart~=0.13.1
 quart_openapi
 quart_cors
+swagger-ui-py
 
 hx711~=0.1
 w1thermsensor~=2.0.0a2

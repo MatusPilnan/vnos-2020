@@ -3,9 +3,10 @@ import json
 from asyncio import Queue
 from functools import wraps
 
-from quart import websocket
+from quart import websocket, jsonify
 from quart_cors import cors
 from quart_openapi import Pint
+from swagger_ui import quart_api_doc
 
 from main import loop
 from varpivo.hardware.display import Display
@@ -14,7 +15,7 @@ from varpivo.hardware.scale import Scale
 from varpivo.hardware.thermometer import Thermometer
 from varpivo.utils import Event
 
-app = Pint(__name__, title="var:pivo API")
+app = Pint(__name__, title="Var:Pivo API")
 app.config['SERVER_NAME'] = "127.0.0.1:5000"
 app = cors(app, allow_origin='*')
 
@@ -125,4 +126,12 @@ asyncio.ensure_future(send_weight())
 asyncio.ensure_future(send_temperature())
 asyncio.ensure_future(observe())
 
+
+@app.route('/api/doc/swagger.json')
+async def swagger():
+    return jsonify(app.__schema__)
+
+
 nieco = OpenApiView(app)
+
+quart_api_doc(app, config_url='http://127.0.0.1:5000/openapi.json', url_prefix='/api/doc', title="Var:Pivo API")
