@@ -34,8 +34,16 @@ class Kettle:
         self._target_temperature = val
         save_kettle(self)
 
+    def add_observing_step(self, step_id: str):
+        self.observing_steps.add(step_id)
+        save_kettle(self)
+
+    def remove_observing_step(self, step_id: str):
+        self.observing_steps.remove(step_id)
+        save_kettle(self)
+
     async def work(self):
-        from varpivo.recipe import CookBook
+        from varpivo.cooking.cookbook import CookBook
         while True:
             temp = Thermometer.get_instance().temperature
             Heater.get_instance().heat = self.target_temperature > temp
@@ -53,3 +61,4 @@ class Kettle:
         if not checkpoint:
             return
         self._target_temperature = checkpoint['target_temperature']
+        self.observing_steps = checkpoint['observing_steps']

@@ -7,7 +7,7 @@ from quart_openapi import Resource
 from varpivo import app, Scale, event_queue
 from varpivo.api.models import recipe_model, step_model, ws_message_model, recipe_list_model, recipe_steps_model, \
     brew_session_model, ws_temperature_model
-from varpivo.recipe import CookBook
+from varpivo.cooking.cookbook import CookBook
 from varpivo.steps import Step
 from varpivo.utils import Event
 

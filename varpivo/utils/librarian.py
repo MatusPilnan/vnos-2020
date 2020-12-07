@@ -15,6 +15,7 @@ def get_checkpoint(file):
 def save_kettle(kettle):
     checkpoint = get_checkpoint(KETTLE_CHECKPOINT_FILE)
     checkpoint['target_temperature'] = kettle.target_temperature
+    checkpoint['observing_steps'] = kettle.observing_steps
     checkpoint['time'] = time()
     checkpoint.close()
 
@@ -24,7 +25,9 @@ def load_kettle():
     if not glob(checkpoint_location + '*'):
         return None
     checkpoint = get_checkpoint(KETTLE_CHECKPOINT_FILE)
-    return {"target_temperature": checkpoint["target_temperature"], "time": checkpoint["time"]}
+    return {"target_temperature": checkpoint["target_temperature"],
+            "time": checkpoint["time"],
+            "observing_steps": checkpoint["observing_steps"]}
 
 
 def save_selected_recipe(recipe):

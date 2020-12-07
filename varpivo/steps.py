@@ -87,11 +87,11 @@ class SetTemperature(Step):
 
     async def start(self):
         Kettle.get_instance().target_temperature = self.target
-        Kettle.get_instance().observing_steps.add(self.id)
+        Kettle.get_instance().add_observing_step(self.id)
         await super().start()
 
     async def stop(self):
-        Kettle.get_instance().observing_steps.remove(self.id)
+        Kettle.get_instance().remove_observing_step(self.id)
         return await super().stop()
 
     async def observe_kettle(self, temperature):
@@ -121,11 +121,11 @@ class KeepTemperature(Step):
 
     async def start(self):
         self.target = time() + self.duration * 60
-        Kettle.get_instance().observing_steps.add(self.id)
+        Kettle.get_instance().add_observing_step(self.id)
         await super().start()
 
     async def stop(self):
-        Kettle.get_instance().observing_steps.remove(self.id)
+        Kettle.get_instance().remove_observing_step(self.id)
         return await super().stop()
 
     async def observe_kettle(self, temperature):

@@ -1,16 +1,11 @@
-import glob
-from os.path import basename
-from shutil import rmtree
 from typing import Dict, List
 
 from pybeerxml import recipe
+from pybeerxml.style import Style
 
-from varpivo import event_observers
-from varpivo.config.config import RECIPES_DIR, DEFAULT_MASH_STEP_TIME, CHECKPOINT_DIR
+from varpivo.config.config import DEFAULT_MASH_STEP_TIME
+from varpivo.cooking.ingredients import Fermentable, Hop, Misc, Ingredient
 from varpivo.steps import *
-from varpivo.utils import prepare_recipe_files
-from varpivo.utils.BeerXMLUnicodeParser import BeerXMLUnicodeParser
-from varpivo.utils.librarian import get_selected_recipe, save_selected_recipe
 
 
 class Recipe(recipe.Recipe):
@@ -133,98 +128,35 @@ class Recipe(recipe.Recipe):
             yield step
 
 
-class CookBook:
-    __instance = None
-    selected_recipe = None
+class TestRecipe(Recipe):
 
+    # noinspection PyMissingConstructor
+    def __init__(self):
+        self.id = 'test-recipe'
+        self.recipe = recipe.Recipe()
+        self.recipe.name = 'Testovací recep'
+        self.recipe.style = Style()
+        self.recipe.style.name = "Penne-tračný test"
+        self.recipe.style.type = 'Testoviny'
+        # noinspection PyListCreation
+        steps: List[Step] = [
+            WeighIngredient(ingredient='Penne Barilla (z Lidla)', grams=1000),
+            AddWater(amount=3)
+        ]
 
-    @staticmethod
-    def get_instance():
-        if CookBook.__instance is None:
-            CookBook()
+        steps.append(SetTemperature(target=69, dependencies=[steps[-1]]))
+        steps.append(AddMisc(name='salt', misc_type='salt', amount=1, dependencies=[steps[-2]]))
+        steps.append(KeepTemperature(name='Len tak nech vidia že môžeme', duration=3, dependencies=[steps[-1]]))
+        steps.append(SetTemperature(target=100, dependencies=[steps[-1]]))
+        steps.append(Step(name='Pridaj cestoviny', description='Šak to je asi jasné celkom', duration=1, dependencies=[
+            steps[-3], steps[-1]
+        ]))
+        steps.append(KeepTemperature(name='Boil', duration=10, dependencies=[steps[-1]]))
 
-        return CookBook.__instance
-
-    @staticmethod
-    async def step_observer(event: Event):
-        if event.event_type[0] == Event.STEP:
-            CookBook.get_instance().save_checkpoint()
-            await event_queue.put(Event(Event.WS, payload=event.payload.to_keg()))
-
-    def __init__(self) -> None:
-        super().__init__()
-        if CookBook.__instance is not None:
-            raise Exception("This class is a singleton!")
-        else:
-            CookBook.__instance = self
-
-        event_observers.add(CookBook.step_observer)
-        self.load_checkpoint()
-        parser = BeerXMLUnicodeParser()
-        path = RECIPES_DIR
-        prepare_recipe_files(glob.glob(f"{path}/*.xml"))
-        self.recipes: Dict[Recipe] = {}
-        for file in glob.glob(f"{path}/*.xml"):
-            for index, recipe in enumerate(parser.parse(xml_file=file)):
-                id = basename(file) + str(index)
-                # noinspection PyTypeChecker
-                self.recipes[id] = Recipe(id=id, recipe=recipe)
-
-    def select_recipe(self, recipeId):
-        if self.selected_recipe:
-            return False
-        self.selected_recipe = self[recipeId]
-        return True
-
-    def unselect_recipe(self):
-        if self.selected_recipe:
-            for step in self.selected_recipe:
-                step.reset()
-            self.selected_recipe = None
-        try:
-            rmtree(CHECKPOINT_DIR)
-        except FileNotFoundError:
-            pass
-
-    def __getitem__(self, item) -> Recipe:
-        return self.recipes[item]
-
-    def load_checkpoint(self):
-        checkpoint = get_selected_recipe()
-        if not checkpoint:
-            return False
-        if checkpoint:
-            self.selected_recipe = checkpoint["recipe"]
-            return True
-        return False
-
-    def save_checkpoint(self):
-        if self.selected_recipe:
-            save_selected_recipe(self.selected_recipe)
-            return True
-        return False
-
-
-class Ingredient:
-    def __init__(self, name: str, amount: float, unit: str) -> None:
-        self.name = name
-        self.amount = amount
-        self.unit = unit
-
-    def to_dict(self):
-        return {"name": self.name, "amount": self.amount, "unit": self.unit}
-
-
-class Fermentable(Ingredient):
-    def __init__(self, fermentable: recipe.Fermentable) -> None:
-        super().__init__(name=fermentable.name, amount=fermentable.amount, unit='kg')
-
-
-class Hop(Ingredient):
-    def __init__(self, hop: recipe.Hop) -> None:
-        super().__init__(name=hop.name, amount=hop.amount * 1000, unit='g')
-
-
-class Misc(Ingredient):
-    def __init__(self, misc: recipe.Misc) -> None:
-        super().__init__(name=misc.name, amount=misc.amount, unit='units')
+        self.ingredients = [
+            Ingredient('Salz', amount=1, unit='štipka').to_dict(),
+            Ingredient('Penne Barilla (z Lidla)', amount=1000, unit='g').to_dict()
+        ]
+        self.steps: Dict[str, Step] = {}
+        for step in steps:
+            self.steps[step.id] = step
