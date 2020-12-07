@@ -27,6 +27,14 @@ class CookBook:
     async def step_observer(event: Event):
         if event.event_type[0] == Event.STEP:
             CookBook.get_instance().save_checkpoint()
+            brewing_finished = True
+            for step in CookBook.get_instance().selected_recipe:
+                if not step.finished:
+                    brewing_finished = False
+                    break
+
+            if brewing_finished:
+                CookBook.get_instance().unselect_recipe()
             await event_queue.put(Event(Event.WS, payload=event.payload.to_keg()))
 
     def __init__(self) -> None:
