@@ -153,10 +153,16 @@ Každý krok môže byť v niektorom z týchto stavov:
 Posunúť sa môže len do stavu s vyšším číslom. Po ukončení kroku sa automaticky spustia tie, ktoré sa týmto dostali do stavu 2.
 Po ukončení všetkých krokov receptu sa vypína ohrev.
 
+Nasledujúci obrázok demonštruje závislosti medzi krokmi testovacieho receptu. Krok na konci šípky je nedostupný, kým nie sú
+dokončené všetky kroky pred ním.  
+![Závislosti medzi krokmi](docs/img/vnos-kroky.jpg "Závislosti medzi krokmi. Dokončenie kroku na začiatku šípky je podmienkou pre začatie kroku na jej konci.")  
+
 Kroky spočívajúce v zmene alebo udržiavaní teploty riadi systém - v slučke každú sekundu kontroluje teplotu v hrnci.
 Pokiaľ je teplota vyššia ako požadovaná, vypína ohrev, v opačnom prípade ho zapína. Ohrev sa zapne vyslaním signálu LOW
 do relé modulu. Krok sa ukončí pri dosiahnutí požadovanej teploty, resp. po uplynutí požadovaného času. Aj do tohoto má
 však používateľ možnosť zasiahnuť predčasným ukončením kroku.
+
+Každá zmena kroku sa vyšle všetkým pripojeným klientom cez WebSocket. Pri začatí a ukončení krokov zobrazí klientska aplikácia upozornenie.
 
 Systém taktiež pri každom začatí a ukončení kroku uloží svoj stav na disk. Tým pádom je možné po prípadnom reštarte pokračovať
 v začatom varení. Pri krokoch udržiavajúcich teplotu sa ukladá reálny čas, kedy sa má krok skončiť, 
@@ -165,7 +171,7 @@ aby prípadný čas výpadku neovplyvnil celkové trvanie daného kroku.
 Systém taktiež v prípade výpadku alebo ukončenia z dôvodu bezpečnosti vypne ohrev. Keďže má použitá špirála vysokú 
 teplotnú zotrvačnosť, krátky výpadok výrazne teplotu neovplyvní.
 
-### Aplikácia
+### Webová aplikácia
 Domovská obrazovka pokiaľ sa nič nevarí zobrazuje zoznam dostupných receptov.  
 ![Zoznam receptov](docs/img/smol/localhost_8080_iPhone%20X.jpg "Zoznam receptov")  
 Po kliknutí na recept sa zobrazí zoznam surovín potrebných na jeho uvarenie.  
