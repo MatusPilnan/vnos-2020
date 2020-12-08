@@ -29,12 +29,12 @@ class Thermometer:
 
     def init_sensor(self):
         if not self.sensor:
-            from w1thermsensor import W1ThermSensor
-            self.sensor = W1ThermSensor()
+            from w1thermsensor import AsyncW1ThermSensor
+            self.sensor = AsyncW1ThermSensor()
 
     @property
-    def temperature(self):
-        return self.sensor.get_temperature()
+    async def temperature(self):
+        return await self.sensor.get_temperature()
 
 
 class EmulatedThermometer(Thermometer):
@@ -42,5 +42,5 @@ class EmulatedThermometer(Thermometer):
         print('Using emulated thermometer!')
 
     @property
-    def temperature(self):
+    async def temperature(self):
         return random() * 100

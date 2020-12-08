@@ -45,7 +45,7 @@ class Kettle:
     async def work(self):
         from varpivo.cooking.cookbook import CookBook
         while True:
-            temp = Thermometer.get_instance().temperature
+            temp = await Thermometer.get_instance().temperature
             Heater.get_instance().heat = self.target_temperature > temp
             steps = set(self.observing_steps)
             if not CookBook.get_instance().selected_recipe:
