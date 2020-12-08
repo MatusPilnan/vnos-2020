@@ -66,11 +66,11 @@ Vytváraný systém by mal ponúkať nasledovné funkcionality:
 V tejto časti opíšeme výrobu a zapojenie hardvéru.
 
 ### Váha
-Na váhu sme použili dva hmotnostné senzory s nosnosťou po 5kg. Tieto sú pripevnené na podstavu a na vážiacu plochu (viď obrázky).
-![Váha](docs/img/vaha.jpg "Váha ako taká")
-![Hmotnostné senzory](docs/img/vaha2.jpg "Hmotnostné senzory váhy")
-Oba tieto senzory sú zapojené do AD prevodníka HX711, každý do jedného z 2 kanálov. Senzory sú zapojené nasledovne:
-![Zapojenie hmotnostného senzora do HX711](docs/img/XpKHR.png )
+Na váhu sme použili dva hmotnostné senzory s nosnosťou po 5kg. Tieto sú pripevnené na podstavu a na vážiacu plochu (viď obrázky).  
+![Váha](docs/img/smol/vaha.jpg "Váha ako taká")
+![Hmotnostné senzory](docs/img/smol/vaha2.jpg "Hmotnostné senzory váhy")  
+Oba tieto senzory sú zapojené do AD prevodníka HX711, každý do jedného z 2 kanálov. Senzory sú zapojené nasledovne:  
+![Zapojenie hmotnostného senzora do HX711](docs/img/smol/XpKHR.png )  
 (obrázok prevzatý z: [StackExchange - Mr.Sky](https://electronics.stackexchange.com/q/260758))
 Na obrázku je ukážka zapojenia jedného senzora, druhý sme zapojili analogicky - biely a zelený kábel na kanál B,
 červený a čierny rovnako na E.
@@ -93,8 +93,8 @@ Tento počin tiež skončil neúspechom, pri ktorom si to odniesol samotný ovl�
 Po tomto krásnom ohňostroji sme plán použíť indukčný ohrev presunuli na vedľajšiu koľaj a hľadali alternativy.
 
 Nakoniec sme použili varnú dosku s obyčajnou špirálou o výkone 600W a dorobili sme k nej riadenie pomocou opticky oddeleného relé modulu.
-Regulovanie teploty bude riešené binárne - hreje alebo nehreje.
-![Elektrický varič](docs/img/varic.jpg "Elektrická varná doska s napájacím káblom a troma káblami na pripojenie k RPi")
+Regulovanie teploty bude riešené binárne - hreje alebo nehreje.  
+![Elektrický varič](docs/img/smol/varic.jpg "Elektrická varná doska s napájacím káblom a troma káblami na pripojenie k RPi")  
 Relé modul má 3 piny: napájanie (5V - VCC), zem (GND) a vstup (IN1). Ich zapojenie na Raspberry Pi vyzerá nasledovne:
 ```
 Relay                   RPi
@@ -138,7 +138,7 @@ Server beží na Pythone a využíva framework [Quart](https://gitlab.com/pgjone
 Spracovávanie na serveri beží v event-loope, takže procesor blokujú iba nevyhnutné operácie a efektívne plánovanie jednotlivých úloh
  umožňuje splniť všetky potrebné funkcie bez nutnosti komplikovaného manažmentu úloh a použitia viacerých procesov.
  
-Momentálne na Raspberry Pi beží Raspbian ale riešenie nie je naň striktne naviazané.
+Momentálne na Raspberry Pi beží Raspberry Pi OS ale riešenie nie je naň striktne naviazané.
 
 Na primárnu komunikáciu sa využíva REST API s OpenAPI špecifikáciou a na posielanie správ zo serveru na klienta WebSocket.
 
@@ -165,9 +165,25 @@ aby prípadný čas výpadku neovplyvnil celkové trvanie daného kroku.
 Systém taktiež v prípade výpadku alebo ukončenia z dôvodu bezpečnosti vypne ohrev. Keďže má použitá špirála vysokú 
 teplotnú zotrvačnosť, krátky výpadok výrazne teplotu neovplyvní.
 
+### Aplikácia
+Domovská obrazovka pokiaľ sa nič nevarí zobrazuje zoznam dostupných receptov.  
+![Zoznam receptov](docs/img/smol/localhost_8080_iPhone%20X.jpg "Zoznam receptov")  
+Po kliknutí na recept sa zobrazí zoznam surovín potrebných na jeho uvarenie.  
+![Zoznam ingrediencií](docs/img/smol/localhost_8080_iPhone%20X%201.jpg "Zoznam ingrediencií")  
+Po kliknutí na tlačidlo *Brew!* a potvrdení, že chceme naozaj začať variť, sa zobrazí zoznam krokov vybraného receptu.  
+![Zoznam krokov](docs/img/smol/localhost_8080_iPhone%20X%202.jpg "Zoznam krokov receptu")  
+V tomto momente je odštartované varenie a aplikácia zobrazuje teplotu z teplomera. Dostupné kroky je možné odštartovať.
+Po kliknutí na kroky s vážením surovín sa zobrazí obrazovka s váhou, ktorá ukazuje aj čo sa má pre daný krok navážiť, aj
+požadované množstvo. Tlačidlom *Tare* sa váha vynuluje, Tlačidlom *Confirm* sa potvrdí navážené množstvo a krok sa označí ako ukončený.
+Váhu pre vybraný krok je možné opäť otvoriť aj po jeho ukončení.  
+![Váha pre daný krok](docs/img/smol/localhost_8080_iPhone%20X%203.jpg "Obrazovka váhy prispôsobená konkrétnemu kroku")  
+Po ukončení niekoľkých krokov vyzerá zoznam nasledovne. Vidíme, že práve prebieha krok udržiavania teploty po dobu 60
+minút, a je na začiatku. V prípade potreby ho môžeme ukončiť tlačidlom *Finish*. Indikátor na spodnej lište ukazuje, že je zapnutý ohrev.  
+![Zoznam krokov neskôr](docs/img/smol/localhost_8080_iPhone%20X%204.jpg "Zoznam krokov neskôr v procese varenia")
+
 # Výsledky riešenia a ich zhodnotenie
 Všetko by to bolo skvelé, ale prečo to ten merák celé, 
-všetko by to bolo skvelé, ale prečo to ten sprostý merák nám dojebal... :)
+všetko by to bolo skvelé, ale prečo to ten sprostý merák vyskratoval... :)
 
 Na vytvorenom zariadení sme síce zatiaľ nevarili, ale už teraz môžeme s hrdosťou prehlásiť že:
 - Vytvorené zariadenie môže otočiť smerovanie domácej výroby piva o 365°.
@@ -185,12 +201,42 @@ Na vytvorenom zariadení sme síce zatiaľ nevarili, ale už teraz môžeme s hr
 8. [Elm Bootstrap](http://elm-bootstrap.info/)
 9. [Luma oled](https://github.com/rm-hull/luma.oled)
 49. Jones, A. & Morrissey, N. (2018). 1001 beers you must try before you die. London: Cassell Illustrated.
-50. [Raspberry Pi 4 GPIO Pinout](https://www.element14.com/community/servlet/JiveServlet/showImage/102-92640-8-726998/GPIO-Pi4.png)
+50. [Raspberry Pi 4 GPIO Pinout](https://www.element14.com/community/servlet/JiveServlet/showImage/102-92640-8-726998/GPIO-Pi4.png)  
+    ![Raspberry Pi 4 GPIO Pinout](https://www.element14.com/community/servlet/JiveServlet/showImage/102-92640-8-726998/GPIO-Pi4.png "Raspberry Pi 4 GPIO Pinout")
 
-Recept na prvé testovacie pivo poskytol [Bc. Bohumír Coufal](https://www.brewersfriend.com/homebrew/brewer/229495/bohumr).
+Recept na prvé testovacie pivo, ktorý možno vidieť na snímkach obrazovky aplikácie, poskytol [Bc. Bohumír Coufal](https://www.brewersfriend.com/homebrew/brewer/229495/bohumr).
 
 # Technická dokumentácia
+V tejto časti prikladáme technickú dokumentáciu k projektu.
 
+## Zoznam súčiastok
+- Raspberry Pi 4
+- 2 * Váhový senzor 5kg
+- HX711 AD prevodník pre váhové senzory
+- Digitálne teplotné čidlo s DS18B20, vodeodolné
+- Rezistor 4,7 - 10 kOhm, momentálne použitý 4,7 kOhm
+- Relé modul 1x 10A/250V s optickým oddelením
+- Elektrická varná doska (prípadne akýkoľvek zdroj ohrevu, ktorý je možné ovládať vypínaním a zapínaním jeho napájania)
+- OLED displej 1,3"
+- Prepojovacie vodiče
+
+## Dokumentácia REST API
+Kompletná dokumentácia je dostupná [TU](docs/api/README.md).
+
+Class | Method | HTTP request | Description
+------------ | ------------- | ------------- | -------------
+*BrewSessionStatusApi* | [**deleteBrewStatus**](docs/api/Apis/BrewSessionStatusApi.md#deletebrewstatus) | **DELETE** /status | Reset state - unselect any selected recipe
+*BrewSessionStatusApi* | [**getBrewStatus**](docs/api/Apis/BrewSessionStatusApi.md#getbrewstatus) | **GET** /status | Get currently selected recipe with steps
+*RecipeStepsApi* | [**deleteStepStart**](docs/api/Apis/RecipeStepsApi.md#deletestepstart) | **DELETE** /step/{stepId} | Finish specified step
+*RecipeStepsApi* | [**postStepStart**](docs/api/Apis/RecipeStepsApi.md#poststepstart) | **POST** /step/{stepId} | Start specified step
+*RecipesApi* | [**getRecipe**](docs/api/Apis/RecipesApi.md#getrecipe) | **GET** /recipe/{recipeId} | Get single recipe
+*RecipesApi* | [**getRecipeList**](docs/api/Apis/RecipesApi.md#getrecipelist) | **GET** /recipe | Retrieve all available recipes
+*RecipesApi* | [**postRecipe**](docs/api/Apis/RecipesApi.md#postrecipe) | **POST** /recipe/{recipeId} | Select recipe and start brew session
+*ScaleApi* | [**deleteScaleRes**](docs/api/Apis/ScaleApi.md#deletescaleres) | **DELETE** /scale | Tare the scale
+*ScaleApi* | [**patchScaleRes**](docs/api/Apis/ScaleApi.md#patchscaleres) | **PATCH** /scale | Start scale calibration
+*ScaleApi* | [**putScaleRes**](docs/api/Apis/ScaleApi.md#putscaleres) | **PUT** /scale | Find scale reference units, after weight was PUT on the scale
+*WSApi* | [**getWebSocketKeg**](docs/api/Apis/WSApi.md#getwebsocketkeg) | **GET** /brizolit/je/cesta/neprestrelna/vesta | Resource format for WS messages
+*WSApi* | [**postWebSocketKeg**](docs/api/Apis/WSApi.md#postwebsocketkeg) | **POST** /brizolit/je/cesta/neprestrelna/vesta | Format of WS message with temperature
 
 
 # Príloha A - Recept na pivo

@@ -1,0 +1,16 @@
+.openapi-generator-ignore
+Apis/BrewSessionStatusApi.md
+Apis/RecipeStepsApi.md
+Apis/RecipesApi.md
+Apis/ScaleApi.md
+Apis/WSApi.md
+Models/BrewSession.md
+Models/Ingredient.md
+Models/Recipe.md
+Models/RecipeList.md
+Models/RecipeListStyle.md
+Models/RecipeStep.md
+Models/StepsList.md
+Models/Temperature.md
+Models/WSKeg.md
+README.md
