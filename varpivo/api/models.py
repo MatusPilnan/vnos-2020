@@ -144,6 +144,9 @@ brew_session_model = {
     "required": ["steps", "recipe"],
     "properties": {
         "steps": step_list_property,
-        "recipe": recipe_model
+        "recipe": recipe_model,
+        "boil_finished_at": {
+            "type": "number"
+        }
     }
 }

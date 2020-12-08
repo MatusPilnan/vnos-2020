@@ -8,12 +8,17 @@ class Thermometer:
     def get_instance():
         if Thermometer.__instance is None:
             try:
-                from w1thermsensor import W1ThermSensor, NoSensorFoundError
-                Thermometer()
+                from w1thermsensor import NoSensorFoundError, KernelModuleLoadError
+                try:
+                    from w1thermsensor import W1ThermSensor
+                    Thermometer()
+                except NoSensorFoundError as e:
+                    print(e)
+                    EmulatedThermometer()
+                except KernelModuleLoadError as e:
+                    print(e)
+                    EmulatedThermometer()
             except ModuleNotFoundError:
-                EmulatedThermometer()
-            except NoSensorFoundError as e:
-                print(e)
                 EmulatedThermometer()
 
         return Thermometer.__instance

@@ -26,6 +26,7 @@ class CookBook:
     @staticmethod
     async def step_observer(event: Event):
         if event.event_type[0] == Event.STEP:
+            await CookBook.get_instance().selected_recipe.step_event(event)
             CookBook.get_instance().save_checkpoint()
             brewing_finished = True
             for step in CookBook.get_instance().selected_recipe:
