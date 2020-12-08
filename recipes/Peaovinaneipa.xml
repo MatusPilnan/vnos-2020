@@ -115,17 +115,6 @@
                 <NAME>Centennial</NAME>
                 <VERSION>1</VERSION>
                 <ALPHA>10</ALPHA>
-                <AMOUNT>0.007</AMOUNT>
-                <USE>Boil</USE>
-                <USER_HOP_USE>Boil</USER_HOP_USE>
-                <TIME>60</TIME>
-                <HOP_TEMP>100</HOP_TEMP>
-                <FORM>Pellet</FORM>
-            </HOP>
-            <HOP>
-                <NAME>Centennial</NAME>
-                <VERSION>1</VERSION>
-                <ALPHA>10</ALPHA>
                 <AMOUNT>0.03</AMOUNT>
                 <USE>Dry Hop</USE>
                 <USER_HOP_USE>Dry Hop</USER_HOP_USE>
