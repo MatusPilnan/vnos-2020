@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RECIPES>
+    <RECIPE>
+        <NAME>Peačovina neipa</NAME>
+        <VERSION>1</VERSION>
+        <TYPE>All Grain</TYPE>
+        <BREWER>Bohumír Coufal</BREWER>
+        <DISPLAY_BATCH_SIZE>5 L</DISPLAY_BATCH_SIZE>
+        <DISPLAY_BOIL_SIZE>11.4 L</DISPLAY_BOIL_SIZE>
+        <BATCH_SIZE>5</BATCH_SIZE>
+        <BOIL_SIZE>11.4</BOIL_SIZE>
+        <BOIL_TIME>60</BOIL_TIME>
+        <EFFICIENCY>70</EFFICIENCY>
+        <NOTES>Yeast - Brewartech New England IPA 10 g</NOTES>
+        <PRIMARY_TEMP>20</PRIMARY_TEMP>
+        <EST_COLOR>6.98</EST_COLOR>
+        <IBU>42.16</IBU>
+        <IBU_METHOD>Tinseth</IBU_METHOD>
+        <EST_ABV>6.28</EST_ABV>
+        <EST_OG>1.062 sg</EST_OG>
+        <EST_FG>1.014 sg</EST_FG>
+        <OG>1.062</OG>
+        <FG>1.014</FG>
+        <PRIMING_SUGAR_NAME>dextrose</PRIMING_SUGAR_NAME>
+        <CARBONATION_USED>dextrose 33.8 g</CARBONATION_USED>
+        <CARBONATION>2.4</CARBONATION>
+        <BF_PRIMING_METHOD>dextrose</BF_PRIMING_METHOD>
+        <BF_PRIMING_AMOUNT>33.8 g</BF_PRIMING_AMOUNT>
+        <BF_CO2_LEVEL>2.4</BF_CO2_LEVEL>
+        <BF_CO2_UNIT>Volumes</BF_CO2_UNIT>
+        <URL></URL>
+        <BATCH_SIZE_MODE>f</BATCH_SIZE_MODE>
+        <YEAST_STARTER>0</YEAST_STARTER>
+        <NO_CHILL_EXTRA_MINUTES></NO_CHILL_EXTRA_MINUTES>
+        <PITCH_RATE>0.35</PITCH_RATE>
+        <FERMENTABLES>
+            <FERMENTABLE>
+                <NAME>Vienna</NAME>
+                <VERSION>1</VERSION>
+                <TYPE>Grain</TYPE>
+                <AMOUNT>0.3</AMOUNT>
+                <YIELD>80.43</YIELD>
+                <COLOR>3.6</COLOR>
+                <ADD_AFTER_BOIL>0</ADD_AFTER_BOIL>
+                <ORIGIN>Finland</ORIGIN>
+                <DIASTATIC_POWER>50</DIASTATIC_POWER>
+            </FERMENTABLE>
+            <FERMENTABLE>
+                <NAME>Wheat Malt</NAME>
+                <VERSION>1</VERSION>
+                <TYPE>Grain</TYPE>
+                <AMOUNT>0.2</AMOUNT>
+                <YIELD>82.61</YIELD>
+                <COLOR>2.5</COLOR>
+                <ADD_AFTER_BOIL>0</ADD_AFTER_BOIL>
+                <ORIGIN>Finland</ORIGIN>
+                <DIASTATIC_POWER>120</DIASTATIC_POWER>
+            </FERMENTABLE>
+            <FERMENTABLE>
+                <NAME>Caramel 50 Malt(20L)</NAME>
+                <VERSION>1</VERSION>
+                <TYPE>Grain</TYPE>
+                <AMOUNT>0.125</AMOUNT>
+                <YIELD>73.91</YIELD>
+                <COLOR>20</COLOR>
+                <ADD_AFTER_BOIL>0</ADD_AFTER_BOIL>
+                <ORIGIN>Finland</ORIGIN>
+                <DIASTATIC_POWER>0</DIASTATIC_POWER>
+            </FERMENTABLE>
+            <FERMENTABLE>
+                <NAME>Flaked Oats</NAME>
+                <VERSION>1</VERSION>
+                <TYPE>Adjunct</TYPE>
+                <AMOUNT>0.125</AMOUNT>
+                <YIELD>71.74</YIELD>
+                <COLOR>2.2</COLOR>
+                <ADD_AFTER_BOIL>0</ADD_AFTER_BOIL>
+                <DIASTATIC_POWER>0</DIASTATIC_POWER>
+            </FERMENTABLE>
+            <FERMENTABLE>
+                <NAME>Pilsner Zero Malt</NAME>
+                <VERSION>1</VERSION>
+                <TYPE>Grain</TYPE>
+                <AMOUNT>0.7</AMOUNT>
+                <YIELD>80.43</YIELD>
+                <COLOR>1.9</COLOR>
+                <ADD_AFTER_BOIL>0</ADD_AFTER_BOIL>
+                <ORIGIN>Finland</ORIGIN>
+                <DIASTATIC_POWER>76</DIASTATIC_POWER>
+            </FERMENTABLE>
+            <FERMENTABLE>
+                <NAME>Peach</NAME>
+                <VERSION>1</VERSION>
+                <TYPE>Fruit</TYPE>
+                <AMOUNT>0.2</AMOUNT>
+                <YIELD>8.8</YIELD>
+                <COLOR>0</COLOR>
+                <ADD_AFTER_BOIL>1</ADD_AFTER_BOIL>
+                <DIASTATIC_POWER>0</DIASTATIC_POWER>
+            </FERMENTABLE>
+        </FERMENTABLES>
+        <HOPS>
+            <HOP>
+                <NAME>Centennial</NAME>
+                <VERSION>1</VERSION>
+                <ALPHA>10</ALPHA>
+                <AMOUNT>0.007</AMOUNT>
+                <USE>Boil</USE>
+                <USER_HOP_USE>Boil</USER_HOP_USE>
+                <TIME>60</TIME>
+                <HOP_TEMP>100</HOP_TEMP>
+                <FORM>Pellet</FORM>
+            </HOP>
+            <HOP>
+                <NAME>Centennial</NAME>
+                <VERSION>1</VERSION>
+                <ALPHA>10</ALPHA>
+                <AMOUNT>0.007</AMOUNT>
+                <USE>Boil</USE>
+                <USER_HOP_USE>Boil</USER_HOP_USE>
+                <TIME>60</TIME>
+                <HOP_TEMP>100</HOP_TEMP>
+                <FORM>Pellet</FORM>
+            </HOP>
+            <HOP>
+                <NAME>Centennial</NAME>
+                <VERSION>1</VERSION>
+                <ALPHA>10</ALPHA>
+                <AMOUNT>0.03</AMOUNT>
+                <USE>Dry Hop</USE>
+                <USER_HOP_USE>Dry Hop</USER_HOP_USE>
+                <TIME>10080</TIME>
+                <HOP_TEMP>20</HOP_TEMP>
+                <FORM>Pellet</FORM>
+            </HOP>
+            <HOP>
+                <NAME>Ekuanot</NAME>
+                <VERSION>1</VERSION>
+                <ALPHA>14.25</ALPHA>
+                <AMOUNT>0.03</AMOUNT>
+                <USE>Dry Hop</USE>
+                <USER_HOP_USE>Dry Hop</USER_HOP_USE>
+                <TIME>10080</TIME>
+                <HOP_TEMP>20</HOP_TEMP>
+                <FORM>Pellet</FORM>
+            </HOP>
+        </HOPS>
+        <MISCS/>
+        <MASH>
+            <NAME>Mash Steps</NAME>
+            <VERSION>1</VERSION>
+            <GRAIN_TEMP>20</GRAIN_TEMP>
+            <MASH_STEPS>
+                <MASH_STEP>
+                    <NAME>Mash for 60 minutes on 65°C</NAME>
+                    <VERSION>1</VERSION>
+                    <TYPE>Infusion</TYPE>
+                    <STEP_TIME>60</STEP_TIME>
+                    <INFUSE_AMOUNT>11.4</INFUSE_AMOUNT>
+                    <STEP_TEMP>65</STEP_TEMP>
+                </MASH_STEP>
+                <MASH_STEP>
+                    <NAME>Sparge with 3L</NAME>
+                    <VERSION>1</VERSION>
+                    <TYPE>Infusion</TYPE>
+                    <STEP_TIME></STEP_TIME>
+                    <INFUSE_AMOUNT>3</INFUSE_AMOUNT>
+                    <STEP_TEMP>72</STEP_TEMP>
+                </MASH_STEP>
+            </MASH_STEPS>
+        </MASH>
+        <YEASTS>
+            <YEAST>
+                <NAME>Safale - English Ale Yeast S-04</NAME>
+                <VERSION>1</VERSION>
+                <TYPE>Ale</TYPE>
+                <FORM>Dry</FORM>
+                <AMOUNT>0.11</AMOUNT>
+                <AMOUNT_IS_WEIGHT>1</AMOUNT_IS_WEIGHT>
+                <PRODUCT_ID>S-04</PRODUCT_ID>
+                <LABORATORY>Fermentis / Safale</LABORATORY>
+                <ATTENUATION>75</ATTENUATION>
+                <FLOCCULATION>High</FLOCCULATION>
+                <MIN_TEMPERATURE>12.222222222222</MIN_TEMPERATURE>
+                <MAX_TEMPERATURE>25</MAX_TEMPERATURE>
+            </YEAST>
+        </YEASTS>
+        <WATERS>
+            <WATER>
+                <NAME>Light colored and hoppy</NAME>
+                <VERSION>1</VERSION>
+                <AMOUNT>5</AMOUNT>
+                <CALCIUM>57</CALCIUM>
+                <BICARBONATE>126</BICARBONATE>
+                <SULFATE>0</SULFATE>
+                <CHLORIDE>0</CHLORIDE>
+                <SODIUM>0</SODIUM>
+                <MAGNESIUM>15</MAGNESIUM>
+                <NOTES></NOTES>
+            </WATER>
+        </WATERS>
+        <STYLE>
+            <NAME>Specialty IPA: New England IPA</NAME>
+            <VERSION>1</VERSION>
+            <CATEGORY>IPA</CATEGORY>
+            <CATEGORY_NUMBER>21</CATEGORY_NUMBER>
+            <STYLE_LETTER>B</STYLE_LETTER>
+            <STYLE_GUIDE>BJCP</STYLE_GUIDE>
+            <TYPE>Ale</TYPE>
+            <OG_MIN>1.06</OG_MIN>
+            <OG_MAX>1.085</OG_MAX>
+            <FG_MIN>1.01</FG_MIN>
+            <FG_MAX>1.015</FG_MAX>
+            <ABV_MIN>6</ABV_MIN>
+            <ABV_MAX>9</ABV_MAX>
+            <IBU_MIN>25</IBU_MIN>
+            <IBU_MAX>60</IBU_MAX>
+            <COLOR_MIN>3</COLOR_MIN>
+            <COLOR_MAX>7</COLOR_MAX>
+        </STYLE>
+    </RECIPE>
+</RECIPES>
