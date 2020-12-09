@@ -63,7 +63,7 @@ Vytváraný systém by mal ponúkať nasledovné funkcionality:
 
 
 ## Hardvér
-V tejto časti opíšeme výrobu a zapojenie hardvéru.
+V tejto časti opíšeme výrobu a zapojenie hardvéru. Niektoré zo senzorov vyžadujú špeciálnu konfiguráciu pripojenia na Raspberry Pi cez `raspi-config`, tieto požiadavky sú spomenuté v dokumentáciách príslušných knižníc.
 
 ### Váha
 Na váhu sme použili dva hmotnostné senzory s nosnosťou po 5kg. Tieto sú pripevnené na podstavu a na vážiacu plochu (viď obrázky).  
