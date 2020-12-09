@@ -34,9 +34,9 @@ class CookBook:
                     brewing_finished = False
                     break
 
+            await event_queue.put(Event(Event.WS, payload=event.payload.to_keg()))
             if brewing_finished:
                 CookBook.get_instance().unselect_recipe()
-            await event_queue.put(Event(Event.WS, payload=event.payload.to_keg()))
 
     def __init__(self) -> None:
         super().__init__()
