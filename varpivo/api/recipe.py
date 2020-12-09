@@ -112,7 +112,7 @@ class BrewStatus(Resource):
             return jsonify({"error": 'No recipe selected'}), HTTPStatus.FAILED_DEPENDENCY
         recipe = CookBook.get_instance().selected_recipe
         return jsonify({"recipe": recipe.cookbook_entry, "steps": list(map(step_to_dict, recipe.steps_list)),
-                        "boil_finished_at": CookBook.get_instance().selected_recipe.boil_finished_at})
+                        "boil_started_at": CookBook.get_instance().selected_recipe.boil_started_at})
 
     @app.doc(tags=['Brew session status'])
     async def delete(self):

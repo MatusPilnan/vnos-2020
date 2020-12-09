@@ -36,6 +36,9 @@ recipe_model = {
         "ingredients": {
             "type": "array",
             "items": ingredient_model
+        },
+        "boil_time": {
+            "type": "number"
         }
     },
     'required': ['id', 'style', 'name', 'ingredients']
@@ -145,7 +148,7 @@ brew_session_model = {
     "properties": {
         "steps": step_list_property,
         "recipe": recipe_model,
-        "boil_finished_at": {
+        "boil_started_at": {
             "type": "number"
         }
     }

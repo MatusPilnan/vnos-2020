@@ -9,7 +9,7 @@ from varpivo.steps import *
 
 
 class Recipe(recipe.Recipe):
-    boil_finished_at = None
+    boil_started_at = None
     target_boil_duration = None
 
     def __init__(self, id: str, recipe: recipe.Recipe):
@@ -116,7 +116,7 @@ class Recipe(recipe.Recipe):
         # noinspection PyUnresolvedReferences
         return {"name": self.recipe.name, "id": self.id,
                 "style": {"name": self.recipe.style.name, "type": self.recipe.style.type},
-                "ingredients": self.ingredients}
+                "ingredients": self.ingredients, "boil_time": self.target_boil_duration}
 
     @property
     def steps_list(self):
@@ -131,10 +131,10 @@ class Recipe(recipe.Recipe):
             yield step
 
     async def step_event(self, event):
-        if self.boil_finished_at is None and isinstance(event.payload, Boil):
-            self.boil_finished_at = int((time() + self.target_boil_duration * 60) * 1000)
+        if self.boil_started_at is None and isinstance(event.payload, Boil):
+            self.boil_started_at = int((time()) * 1000)
             await event_queue.put(Event(Event.WS, payload=json.dumps(
-                {"content": "boil_finished_at", "payload": json.dumps(self.boil_finished_at)})))
+                {"content": "boil_started_at", "payload": json.dumps(self.boil_started_at)})))
 
 
 class TestRecipe(Recipe):
