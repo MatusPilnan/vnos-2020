@@ -43,6 +43,8 @@ def collect_websocket(func):
         connected_websockets.add(queue)
         try:
             return await func(queue, *args, **kwargs)
+        except Exception as e:
+            print(e)
         finally:
             connected_websockets.remove(queue)
 

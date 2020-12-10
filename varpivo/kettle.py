@@ -50,7 +50,7 @@ class Kettle:
             steps = set(self.observing_steps)
             if not CookBook.get_instance().selected_recipe:
                 self.target_temperature = 0
-                del Kettle.__instance
+                Kettle.__instance = None
                 return
             for observer in steps:
                 await CookBook.get_instance().selected_recipe.steps[observer].observe_kettle(temp)

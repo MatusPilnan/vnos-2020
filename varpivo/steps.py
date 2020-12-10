@@ -142,6 +142,10 @@ class KeepTemperature(Step):
         self.target = None
 
 
+class Boil(KeepTemperature):
+    pass
+
+
 class AddHop(Step):
     kind = 'hop'
 
