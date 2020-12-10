@@ -95,7 +95,7 @@ async def send_temperature():
 
 
 async def temperature_to_keg():
-    temperature = round(Thermometer.get_instance().temperature)
+    temperature = round(await Thermometer.get_instance().temperature)
     heating = Heater.get_instance().heat
     message = json.dumps({"payload": json.dumps({"temperature": temperature, "heating": heating}),
                           "content": "temperature"})
