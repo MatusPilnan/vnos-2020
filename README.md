@@ -54,7 +54,7 @@ Vytváraný systém by mal ponúkať nasledovné funkcionality:
  - Zobrazenie aktuálneho stavu jednotlivých krokov
  - Možnosť zrušiť varenie
  - Možnosť nakalibrovať váhu
- - Možnosť predčasne ukončiť jednotlivé kroky, ako aj celý proces varenia
+ - Možnosť predčasne ukončiť jednotlivé kroky, keď používateľ uzná za vhodné.
  
 Ďalej by mal systém spĺňať nasledovné požiadavky:
  - Váha musí mať nosnosť aspoň 9kg (postačujúce pre objem sladu v domácich podmienkach)
@@ -102,6 +102,7 @@ VCC ------------------> Pin#02 (DC 5V)
 GND ------------------> Pin#20 (Ground)
 IN1 ------------------> Pin#18 (GPIO24)
 ```
+Samotný varič je cez relé zapojený tak, aby bol obvod rozpojený pokiaľ je relé od systému odpojené. Ohrev sa zapne na signál LOW z Raspberry.
 
 ### Teplomer
 
@@ -142,8 +143,6 @@ Momentálne na Raspberry Pi beží Raspberry Pi OS ale riešenie nie je naň str
 
 Na primárnu komunikáciu sa využíva REST API s OpenAPI špecifikáciou a na posielanie správ zo serveru na klienta WebSocket.
 
-Celý vnorený sýstém je veľmi veľmi soft RT systém, keďže miernym (ani výraznejším) oneskorením sa nič zásadné nestane.
-
 Stav aplikácie je v priebehu varenia reprezentovaný krokmi receptu. Tieto sa získajú priamo z BeerXML receptu pri štarte aplikácie.
 Každý krok môže byť v niektorom z týchto stavov:
 1. Nedostupný - neboli ukončené všetky kroky, na ktorých je tento krok závislý,
@@ -169,7 +168,7 @@ v začatom varení. Pri krokoch udržiavajúcich teplotu sa ukladá reálny čas
 aby prípadný čas výpadku neovplyvnil celkové trvanie daného kroku.
 
 Systém taktiež v prípade výpadku alebo ukončenia z dôvodu bezpečnosti vypne ohrev. Keďže má použitá špirála vysokú 
-teplotnú zotrvačnosť, krátky výpadok výrazne teplotu neovplyvní.
+teplotnú zotrvačnosť, krátky výpadok výrazne teplotu neovplyvní. Pokiaľ nastane porucha na váhe alebo ohreve, nič zásadné sa nestane, maximálne bude váha dávať nezmyselné hodnoty a ohrev sa vypne. Poruchu na teplomere dokáže systém odhaliť a pokiaľ k nej dôjde, odstaví ohrev kým nebude opravená.
 
 ### Webová aplikácia
 Domovská obrazovka pokiaľ sa nič nevarí zobrazuje zoznam dostupných receptov.  
@@ -187,13 +186,19 @@ Po ukončení niekoľkých krokov vyzerá zoznam nasledovne. Vidíme, že práve
 minút, a je na začiatku. V prípade potreby ho môžeme ukončiť tlačidlom *Finish*. Indikátor na spodnej lište ukazuje, že je zapnutý ohrev.  
 ![Zoznam krokov neskôr](docs/img/smol/localhost_8080_iPhone%20X%204.jpg "Zoznam krokov neskôr v procese varenia")
 
-# Výsledky riešenia a ich zhodnotenie
-Všetko by to bolo skvelé, ale prečo to ten merák celé, 
-všetko by to bolo skvelé, ale prečo to ten sprostý merák vyskratoval... :)
+# Testovanie 
+Počas vývoja celá aplikácia fungovala na náhodne generovaných dátach namiesto senzorov. Tie stačili na vychytanie podstatnej časti múch už pri vývoji.
 
-Na vytvorenom zariadení sme síce zatiaľ nevarili, ale už teraz môžeme s hrdosťou prehlásiť že:
-- Vytvorené zariadenie môže otočiť smerovanie domácej výroby piva o 365°.
-- Neobmedzuje sa nutne len na varenie piva. Riešenie je dostatočne všeobecné a po vytvorení konktrétneho formátu receptu by malo byť možné ho použiť aj na varenie iných substancií.
+Jednotlivé senzory a časti systému sme pred zapojením do systému testovali nezávisle v samostatných skriptoch. Takto sme overili napríklad ako funguje čítanie a kalibrácia váhy, alebo na ktorú hranu sa zapína ohrev. Tiež sme tak včas zistili, že použitému relé modulu na zopnutie nestačí 3,3V, ale potrebuje 5V. Tiež sme skúmali, čo sa stane pri odpojení rôznych káblov za behu. Týmto sme overili že ohrev sa pri poruchespojenia platničky a Raspberry Pi vypne. Ďalej sme zistili, že knižnica na teplomer vyhlási pri odpojení chybu ktorú je možné v programe odchytiť.
+
+Keď bol celý systém pripravený na používanie, pripravili sme testovací recept na cestoviny, ktorý obsahuje každý typ kroku ktorý sa môže vyskytnúť pri varení piva. Testovali sme s cestovinami, pretože suroviny na výrobu piva nie sú lacné, a keby sa niečo pokazilo, bolo by nám ich ľúto. Tento test prebehol úspešne a odhalil posledné drobné nedostatky, ktoré však vďaka možnosti reštartovať varenie bez straty postupu neovplyvnili výsledok. Tu sme zistili, že váha pri poruche (rozpojil sa zemnič) len nevysiela zmysluplné údaje, a svieti na nej 0. Po zapojení opäť išla bez problémov. Okrem toho sme aj zistili, že elektrický varič [bez zapojenia do elektriny nefunguje](https://drive.google.com/file/d/1apnsNjnSvL0hEiXJFzaXcr9tOPWkarBX/view?usp=sharing).
+
+# Výsledky riešenia a ich zhodnotenie
+Výsledkom projektu je systém schopný uľahčiť varenie domáceho piva. Jedná sa o systém reálneho času, keďže pracuje s fyzikálnym časom, ale keďže ide rádovo o minúty, je to veľmi veľmi veľmi soft RT systém, pretože miernym (ani výraznejším) oneskorením sa nič zásadné nestane.
+
+Zatiaľ sme s týmto systémom uvarili len cestoviny, pretože sme nechceli riskovať stratu drahých surovín pokiaľ by sa niečo pokazilo, no tento test považujeme za úspešný a tým pádom prehlasujeme systém za pripravený na uvarenie prvej z mnohých várok piva. Recept na túto várku je už hotový. Zároveň sme tým ukázali, že systém sa neobmedzuje nutne len na varenie piva. Riešenie je dostatočne všeobecné a po vytvorení konktrétneho formátu receptu by malo byť možné ho použiť aj na varenie iných substancií.
+
+[Videoprezentácia](https://youtu.be/SqtGa3F3YQM)
 
 
 # Zoznam použitej literatúry
