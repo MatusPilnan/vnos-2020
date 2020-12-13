@@ -6,7 +6,7 @@ from quart_openapi import Resource
 
 from varpivo import app, Scale, event_queue
 from varpivo.api.models import recipe_model, step_model, ws_message_model, recipe_list_model, recipe_steps_model, \
-    brew_session_model, ws_temperature_model
+    brew_session_model, ws_temperature_model, message_model
 from varpivo.cooking.cookbook import CookBook
 from varpivo.steps import Step
 from varpivo.utils import Event
@@ -147,17 +147,26 @@ class ScaleRes(Resource):
         return jsonify({}), HTTPStatus.NO_CONTENT
 
 
+@app.route('/discover-varpivo')
+class Discover(Resource):
+    @app.doc(tags=['Info'])
+    @app.response(HTTPStatus.OK, description='', validator=app.create_validator('message', message_model))
+    async def get(self):
+        """Used to check if this is a Var:Pivo server, or to ping"""
+        return jsonify({"message": "OK"})
+
+
 @app.route("/brizolit/je/cesta/neprestrelna/vesta")
 class WebSocketKeg(Resource):
     @app.response(HTTPStatus.OK, description="Tatrofkaaaaaa", validator=app.create_validator('wskeg', ws_message_model))
     @app.doc(tags=['WS'])
-    def get(self):
+    async def get(self):
         """Resource format for WS messages"""
         return jsonify({""}, HTTPStatus.IM_A_TEAPOT)
 
     @app.response(HTTPStatus.OK, description="ZonickaaaAAA",
                   validator=app.create_validator('temperature', ws_temperature_model))
     @app.doc(tags=['WS'])
-    def post(self):
+    async def post(self):
         """Format of WS message with temperature"""
         return jsonify({""}, HTTPStatus.IM_A_TEAPOT)

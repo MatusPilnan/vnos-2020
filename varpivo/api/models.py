@@ -153,3 +153,14 @@ brew_session_model = {
         }
     }
 }
+
+message_model = {
+    "type": "object",
+    "title": "Message",
+    "required": ["message"],
+    "properties": {
+        "message": {
+            "type": "string"
+        }
+    }
+}
