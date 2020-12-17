@@ -5,6 +5,7 @@ on:
       - master
     paths:
       - 'varpivo/api/**'
+      - '.github/workflows/update-api.yml' 
 
 jobs:
   build:
