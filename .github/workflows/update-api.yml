@@ -31,8 +31,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v${{ ${GITHUB_RUN_NUMBER} }}
-          release_name: API update release ${{ ${GITHUB_RUN_NUMBER} }}
+          tag_name: v${{ github.run_number }}
+          release_name: API update release ${{ github.run_number }}
           draft: false
           prerelease: false
       - name: Upload Release Asset
