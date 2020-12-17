@@ -1,0 +1,12 @@
+pyfiglet~=0.8.post1
+PyInquirer~=1.0.3
+pybeerxml~=2.1.2
+
+colorama~=0.3.7
+termcolor~=1.1.0
+
+Quart~=0.13.1
+quart_openapi
+quart_cors
+swagger-ui-py
+
