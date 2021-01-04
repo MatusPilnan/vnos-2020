@@ -23,6 +23,7 @@ app.config['SERVER_NAME'] = "127.0.0.1:5000"
 app = cors(app, allow_origin='*')
 app.logger.setLevel('INFO')
 Security.get_instance()
+Display.get_instance()
 
 
 @app.route('/')

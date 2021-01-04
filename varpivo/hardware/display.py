@@ -105,6 +105,9 @@ class NetworkScreen(Screen):
 
     def show(self):
         from luma.core.render import canvas
+
+        message = 'IP Addresses:\n' + '\n'.join(SystemInfo.get_instance().addresses)
+
         with canvas(self.display) as draw:
             draw.rectangle(self.display.bounding_box, outline="black", fill="black")
-            draw.text((5, 15), 'Serus', fill="white")
+            draw.text((5, 5), message, fill="white")

@@ -6,6 +6,8 @@ import pathlib
 
 from quart_openapi import Swagger
 
+from varpivo.config import config
+
 loop = asyncio.get_event_loop()
 
 if __name__ == "__main__":
@@ -24,4 +26,4 @@ if __name__ == "__main__":
         with open(path, 'w', encoding='utf8') as f:
             json.dump(Swagger(app).as_dict(), f, indent=2)
     else:
-        app.run(loop=loop)
+        app.run(loop=loop, port=config.PORT)
