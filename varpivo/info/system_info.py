@@ -5,6 +5,7 @@ from typing import List
 from varpivo.hardware.heater import Heater
 from varpivo.hardware.scale import Scale
 from varpivo.hardware.thermometer import Thermometer
+from varpivo.utils.network import get_local_ip, get_public_ip
 
 
 class SystemInfo:
@@ -28,7 +29,7 @@ class SystemInfo:
         self._temperature = None
         self._heating = None
         self._weight = None
-        self._addresses = None
+        self.addresses = []
 
     @staticmethod
     def add_observer(observer, properties: List[int] = None):
@@ -43,6 +44,7 @@ class SystemInfo:
     @staticmethod
     async def collect_info():
         instance = SystemInfo.get_instance()
+        await instance.resolve_ip_addresses()
         while True:
             instance.changed_properties = set()
             instance.temperature = round(await Thermometer.get_instance().temperature)
@@ -59,6 +61,10 @@ class SystemInfo:
                     else:
                         observer.func()
             await asyncio.sleep(0.5)
+
+    async def resolve_ip_addresses(self):
+        self.addresses.append(get_local_ip())
+        self.addresses.append(await get_public_ip())
 
     @property
     def temperature(self):

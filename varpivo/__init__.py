@@ -21,6 +21,7 @@ app = Pint(__name__, title="Var:Pivo API")
 app.config['SERVER_NAME'] = "127.0.0.1:5000"
 app = cors(app, allow_origin='*')
 app.logger.setLevel('INFO')
+Display.get_instance()
 
 
 @app.route('/')

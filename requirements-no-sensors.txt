@@ -9,4 +9,4 @@ Quart~=0.13.1
 quart_openapi
 quart_cors
 swagger-ui-py
-
+httpx
