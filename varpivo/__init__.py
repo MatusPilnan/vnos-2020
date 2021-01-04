@@ -103,8 +103,10 @@ from quart_openapi import OpenApiView
 
 SystemInfo.add_observer(send_temperature, [SystemInfo.TEMPERATURE, SystemInfo.HEATING])
 SystemInfo.add_observer(send_weight, [SystemInfo.WEIGHT])
+
 asyncio.ensure_future(SystemInfo.collect_info())
 asyncio.ensure_future(observe())
+asyncio.ensure_future(Display.cycle_screens())
 
 
 @app.route('/api/doc/swagger.json')

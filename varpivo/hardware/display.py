@@ -1,3 +1,9 @@
+import asyncio
+
+from varpivo.config import config
+from varpivo.info.system_info import SystemInfo
+
+
 class Display:
     __instance = None
 
@@ -17,51 +23,31 @@ class Display:
 
         serial = i2c(port=1, address=0x3C)
         self.device = sh1106(serial)
-        self._temperature = -1
-        self._weight = -1
-        self._heating = False
+        self.screens = [SummaryScreen(self.device), NetworkScreen(self.device)]
+        self._current_screen = 0
+        self.screens[self._current_screen].show()
+        self.screens[self._current_screen].observe_sys_info()
 
     @property
-    def temperature(self):
-        return self._temperature
+    def current_screen(self):
+        return self._current_screen
 
-    @temperature.setter
-    def temperature(self, val):
-        self._temperature = val
-        self.show()
+    @current_screen.setter
+    def current_screen(self, val):
+        self.screens[self._current_screen].stop_observing()
+        if val < 0:
+            val += len(self.screens)
 
-    @property
-    def weight(self):
-        return self._weight
+        val = val % len(self.screens)
+        self._current_screen = val
+        self.screens[self._current_screen].show()
+        self.screens[self._current_screen].observe_sys_info()
 
-    @weight.setter
-    def weight(self, val):
-        self._weight = max(val, 0)
-        self.show()
-
-    @property
-    def heating(self):
-        return self._heating
-
-    @heating.setter
-    def heating(self, val):
-        self._heating = val
-        self.show()
-
-    def show(self, message=None):
-        from luma.core.render import canvas
-
-        if not message:
-            message = ''
-            if self.temperature > -1:
-                message += f'Temperature: {self.temperature}°C\n'
-            message += f'Heater {"on" if self._heating else "off"}\n'
-            if self.weight > -1:
-                message += f'Weight: {self.weight} g'
-
-        with canvas(self.device) as draw:
-            draw.rectangle(self.device.bounding_box, outline="black", fill="black")
-            draw.text((5, 15), message, fill="white")
+    @staticmethod
+    async def cycle_screens():
+        while True:
+            Display.get_instance().current_screen += 1
+            await asyncio.sleep(config.DISPLAY_CYCLE_INTERVAL)
 
 
 class EmulatedDisplay(Display):
@@ -72,3 +58,45 @@ class EmulatedDisplay(Display):
 
     def show(self, **kwargs):
         pass
+
+
+class Screen:
+    observed_properties = [SystemInfo.ANY]
+
+    def __init__(self, display=None):
+        self.display = display
+
+    def observe_sys_info(self):
+        SystemInfo.add_observer(self.show, self.observed_properties)
+
+    def stop_observing(self):
+        SystemInfo.remove_observer(self.show)
+
+    def show(self):
+        pass
+
+
+class SummaryScreen(Screen):
+    observed_properties = [SystemInfo.TEMPERATURE, SystemInfo.HEATING, SystemInfo.WEIGHT]
+
+    def show(self):
+        from luma.core.render import canvas
+
+        info = SystemInfo.get_instance()
+        message = f'Temperature: {info.temperature}°C\n' \
+                  f'Heater {"on" if info.heating else "off"}\n' \
+                  f'Weight: {info.weight} g'
+
+        with canvas(self.display) as draw:
+            draw.rectangle(self.display.bounding_box, outline="black", fill="black")
+            draw.text((5, 15), message, fill="white")
+
+
+class NetworkScreen(Screen):
+    observed_properties = [SystemInfo.ADDRESSES]
+
+    def show(self):
+        from luma.core.render import canvas
+        with canvas(self.display) as draw:
+            draw.rectangle(self.display.bounding_box, outline="black", fill="black")
+            draw.text((5, 15), 'Serus', fill="white")
