@@ -8,6 +8,8 @@ from quart_openapi import Pint
 from swagger_ui import quart_api_doc
 
 from main import loop
+from varpivo.config import config
+from varpivo.hardware.buttons import Buttons
 from varpivo.hardware.display import Display
 from varpivo.hardware.heater import Heater
 from varpivo.hardware.scale import Scale
@@ -103,10 +105,12 @@ from quart_openapi import OpenApiView
 
 SystemInfo.add_observer(send_temperature, [SystemInfo.TEMPERATURE, SystemInfo.HEATING])
 SystemInfo.add_observer(send_weight, [SystemInfo.WEIGHT])
+Buttons.add_callback(Display.next_screen, config.BUTTON_NEXT_GPIO)
+Buttons.add_callback(Display.previous_screen, config.BUTTON_PREV_GPIO)
 
 asyncio.ensure_future(SystemInfo.collect_info())
 asyncio.ensure_future(observe())
-asyncio.ensure_future(Display.cycle_screens())
+asyncio.ensure_future(Buttons.listen_for_buttons())
 
 
 @app.route('/api/doc/swagger.json')

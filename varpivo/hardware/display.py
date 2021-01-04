@@ -46,8 +46,16 @@ class Display:
     @staticmethod
     async def cycle_screens():
         while True:
-            Display.get_instance().current_screen += 1
+            Display.next_screen()
             await asyncio.sleep(config.DISPLAY_CYCLE_INTERVAL)
+
+    @staticmethod
+    def next_screen():
+        Display.get_instance().current_screen += 1
+
+    @staticmethod
+    def previous_screen():
+        Display.get_instance().current_screen -= 1
 
 
 class EmulatedDisplay(Display):
