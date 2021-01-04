@@ -1,4 +1,5 @@
 import asyncio
+import logging
 
 from varpivo.config import config
 from varpivo.info.system_info import SystemInfo
@@ -18,14 +19,16 @@ class Display:
         return Display.__instance
 
     def __init__(self):
+        # noinspection PyUnresolvedReferences
         from luma.core.interface.serial import i2c
+        # noinspection PyUnresolvedReferences
         from luma.oled.device import sh1106
 
         serial = i2c(port=1, address=0x3C)
         self.device = sh1106(serial)
         self.screens = [SummaryScreen(self.device), NetworkScreen(self.device)]
         self._current_screen = 0
-        self.screens[self._current_screen].show()
+        StartupScreen(self.device).show()
         self.screens[self._current_screen].observe_sys_info()
 
     @property
@@ -88,6 +91,7 @@ class SummaryScreen(Screen):
     observed_properties = [SystemInfo.TEMPERATURE, SystemInfo.HEATING, SystemInfo.WEIGHT]
 
     def show(self):
+        # noinspection PyUnresolvedReferences
         from luma.core.render import canvas
 
         info = SystemInfo.get_instance()
@@ -104,6 +108,7 @@ class NetworkScreen(Screen):
     observed_properties = [SystemInfo.ADDRESSES]
 
     def show(self):
+        # noinspection PyUnresolvedReferences
         from luma.core.render import canvas
 
         message = 'IP Addresses:\n' + '\n'.join(SystemInfo.get_instance().addresses)
@@ -111,3 +116,19 @@ class NetworkScreen(Screen):
         with canvas(self.display) as draw:
             draw.rectangle(self.display.bounding_box, outline="black", fill="black")
             draw.text((5, 5), message, fill="white")
+
+
+class StartupScreen(Screen):
+    def show(self):
+        # noinspection PyBroadException
+        try:
+            # noinspection PyUnresolvedReferences
+            from PIL import Image
+
+            with Image.open('varpivo.jpg') as img:
+                background = Image.new(mode='1', size=(self.display.width, self.display.height))
+                position = ((self.display.width - img.width) // 2, (self.display.height - img.height) // 2)
+                background.paste(img, position)
+                self.display.display(background)
+        except Exception:
+            logging.getLogger('quart.app').info('Not showing splashscreen')
