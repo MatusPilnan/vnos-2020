@@ -37,16 +37,27 @@ class SystemInfo:
         SystemInfo.get_instance().observers.append(SystemInfoObserver(observer, properties))
 
     @staticmethod
+    def remove_observer(func):
+        SystemInfo.get_instance().observers = [x for x in SystemInfo.get_instance().observers if x.func != func]
+
+    @staticmethod
     async def collect_info():
         instance = SystemInfo.get_instance()
         while True:
-            instance.changed_properties = {SystemInfo.ANY}
+            instance.changed_properties = set()
             instance.temperature = round(await Thermometer.get_instance().temperature)
             instance.weight = int(await Scale.get_instance().weight)
             instance.heating = Heater.get_instance().heat
+
+            if len(instance.changed_properties) > 0:
+                instance.changed_properties.add(SystemInfo.ANY)
+
             for observer in instance.observers:
-                if instance.changed_properties.union(observer.observed_properties):
-                    await observer.func()
+                if observer.func and instance.changed_properties.union(observer.observed_properties):
+                    if asyncio.iscoroutinefunction(observer.func):
+                        await observer.func()
+                    else:
+                        observer.func()
             await asyncio.sleep(0.5)
 
     @property
