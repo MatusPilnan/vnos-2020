@@ -1,6 +1,8 @@
 PORT = 5000
 PUBLIC_PORT = 6718
 
+FRONTEND_URL = 'https://matuspilnan.github.io/varpivo-elm'
+
 RECIPES_DIR = 'recipes'
 SCALE_CALIBRATION_FILE = 'scale_calibration.json'
 SCALE_CALIBRATION_ERROR_THRESHOLD = 50
@@ -11,6 +13,8 @@ DEFAULT_MASH_STEP_TIME = 60
 CHECKPOINT_DIR = 'shelf'
 RECIPE_CHECKPOINT_FILE = "shelf.page"
 KETTLE_CHECKPOINT_FILE = "shelf.kettle"
+
+NDEF_FILE = 'out/ndef_file'
 
 DISPLAY_CYCLE_INTERVAL = 120
 

@@ -35,6 +35,9 @@ class SystemInfo:
     def add_observer(observer, properties: List[int] = None):
         if not properties:
             properties = [SystemInfo.ANY]
+
+        if not isinstance(properties, list):
+            properties = [properties]
         SystemInfo.get_instance().observers.append(SystemInfoObserver(observer, properties))
 
     @staticmethod
@@ -45,26 +48,31 @@ class SystemInfo:
     async def collect_info():
         instance = SystemInfo.get_instance()
         await instance.resolve_ip_addresses()
+        await instance.notify_observers()
         while True:
             instance.changed_properties = set()
             instance.temperature = round(await Thermometer.get_instance().temperature)
             instance.weight = int(await Scale.get_instance().weight)
             instance.heating = Heater.get_instance().heat
 
-            if len(instance.changed_properties) > 0:
-                instance.changed_properties.add(SystemInfo.ANY)
-
-            for observer in instance.observers:
-                if observer.func and instance.changed_properties.union(observer.observed_properties):
-                    if asyncio.iscoroutinefunction(observer.func):
-                        await observer.func()
-                    else:
-                        observer.func()
+            await instance.notify_observers()
             await asyncio.sleep(0.5)
+
+    async def notify_observers(self):
+        if len(self.changed_properties) > 0:
+            self.changed_properties.add(SystemInfo.ANY)
+
+        for observer in self.observers:
+            if observer.func and self.changed_properties.intersection(observer.observed_properties):
+                if asyncio.iscoroutinefunction(observer.func):
+                    await observer.func()
+                else:
+                    observer.func()
 
     async def resolve_ip_addresses(self):
         self.addresses.append(get_local_ip())
         self.addresses.append(await get_public_ip())
+        self.changed_properties.add(SystemInfo.ADDRESSES)
 
     @property
     def temperature(self):
