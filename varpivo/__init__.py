@@ -93,6 +93,7 @@ async def observe():
 async def shutdown():
     print('Cleaning up...')
     try:
+        # noinspection PyUnresolvedReferences
         from RPi import GPIO
         GPIO.cleanup()
     except ModuleNotFoundError:
@@ -109,7 +110,8 @@ Buttons.add_callback(Display.previous_screen, config.BUTTON_PREV_GPIO)
 
 asyncio.ensure_future(SystemInfo.collect_info())
 asyncio.ensure_future(observe())
-asyncio.ensure_future(Buttons.listen_for_buttons())
+asyncio.ensure_future(Buttons.get_instance().listen_for_buttons())
+asyncio.ensure_future(NFCTagEmulator.get_instance().run_nfc_tag_emulator())
 
 
 @app.route('/api/doc/swagger.json')
