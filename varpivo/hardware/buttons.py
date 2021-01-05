@@ -24,6 +24,7 @@ class Buttons:
     def get_instance():
         if Buttons.__instance is None:
             try:
+                # noinspection PyUnresolvedReferences
                 import RPi.GPIO as GPIO
                 Buttons.__instance = Buttons()
 
@@ -33,11 +34,12 @@ class Buttons:
         return Buttons.__instance
 
     def __init__(self):
+        # noinspection PyUnresolvedReferences
         import RPi.GPIO as GPIO
         GPIO.setmode(GPIO.BCM)
 
-    @staticmethod
-    async def listen_for_buttons():
+    async def listen_for_buttons(self):
+        # noinspection PyUnresolvedReferences
         import RPi.GPIO as GPIO
         GPIO.setmode(GPIO.BCM)
         for pin in Buttons.__button_pins:
@@ -65,7 +67,6 @@ class EmulatedButtons(Buttons):
     def __init__(self):
         logging.getLogger('quart.app').info('Using emulated buttons.')
 
-    @staticmethod
-    async def listen_for_buttons():
+    async def listen_for_buttons(self):
         while True:
             await asyncio.sleep(120)
