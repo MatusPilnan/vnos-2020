@@ -14,6 +14,7 @@ from varpivo.hardware.display import Display
 from varpivo.hardware.heater import Heater
 from varpivo.hardware.scale import Scale
 from varpivo.hardware.thermometer import Thermometer
+from varpivo.info.nfc import NFCTagEmulator
 from varpivo.security.security import Security
 from varpivo.info.system_info import SystemInfo
 from varpivo.utils import Event
@@ -94,6 +95,7 @@ async def observe():
 @app.after_serving
 async def shutdown():
     print('Cleaning up...')
+    await NFCTagEmulator.get_instance().stop()
     try:
         # noinspection PyUnresolvedReferences
         from RPi import GPIO

@@ -17,6 +17,8 @@ RECIPE_CHECKPOINT_FILE = "shelf.page"
 KETTLE_CHECKPOINT_FILE = "shelf.kettle"
 SECURITY_CHECKPOINT_FILE = "shelf.security"
 
+NDEF_FILE = 'out/ndef_file'
+
 DISPLAY_CYCLE_INTERVAL = 120
 
 BUTTON_NEXT_GPIO = 21
