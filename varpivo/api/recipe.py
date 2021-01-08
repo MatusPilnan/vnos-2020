@@ -7,9 +7,22 @@ from quart_openapi import Resource
 from varpivo import app, Scale, event_queue
 from varpivo.api.models import recipe_model, step_model, ws_message_model, recipe_list_model, recipe_steps_model, \
     brew_session_model, ws_temperature_model, message_model
+from varpivo.config import config
 from varpivo.cooking.cookbook import CookBook
+from varpivo.security.security import Security
 from varpivo.steps import Step
 from varpivo.utils import Event
+
+
+def brew_session_code_required(func):
+    async def check(*args, **kwargs):
+        if not Security.check_code(request.headers.get(config.BREW_SESSION_CODE_HEADER)):
+            return jsonify({'error': "Missing or invalid brew session code"}), HTTPStatus.UNAUTHORIZED
+        return func(*args, **kwargs)
+
+    check.__doc__ = func.__doc__
+    check.__name__ = func.__name__
+    return check
 
 
 @app.route("/recipe")
@@ -57,7 +70,7 @@ class Recipe(Resource):
     async def post(self, recipeId):
         """Select recipe and start brew session"""
         try:
-            if CookBook.get_instance().select_recipe(recipeId):
+            if await CookBook.get_instance().select_recipe(recipeId):
                 return jsonify({"steps": list(map(step_to_dict, CookBook.get_instance()[recipeId].steps_list))})
             else:
                 return jsonify({"error": 'Recipe already selected'}), HTTPStatus.CONFLICT
@@ -71,6 +84,8 @@ class Recipe(Resource):
 class StepStart(Resource):
     @app.response(HTTPStatus.OK, description="", validator=recipe_step)
     @app.doc(tags=['Recipe steps'])
+    @app.param(config.BREW_SESSION_CODE_HEADER, 'Brew session code', _in='header')
+    @brew_session_code_required
     async def post(self, stepId):
         """Start specified step"""
         if not CookBook.get_instance().selected_recipe:
@@ -86,6 +101,8 @@ class StepStart(Resource):
 
     @app.response(HTTPStatus.OK, description="", validator=recipe_step)
     @app.doc(tags=['Recipe steps'])
+    @app.param(config.BREW_SESSION_CODE_HEADER, 'Brew session code', _in='header')
+    @brew_session_code_required
     async def delete(self, stepId):
         """Finish specified step"""
         if not CookBook.get_instance().selected_recipe:
@@ -105,6 +122,7 @@ class StepStart(Resource):
 @app.route("/status")
 class BrewStatus(Resource):
     @app.response(HTTPStatus.OK, description='OK', validator=app.create_validator('brew_session', brew_session_model))
+    @app.param(config.BREW_SESSION_CODE_HEADER, 'Brew session code', _in='header')
     @app.doc(tags=['Brew session status'])
     async def get(self):
         """Get currently selected recipe with steps"""
@@ -112,7 +130,8 @@ class BrewStatus(Resource):
             return jsonify({"error": 'No recipe selected'}), HTTPStatus.FAILED_DEPENDENCY
         recipe = CookBook.get_instance().selected_recipe
         return jsonify({"recipe": recipe.cookbook_entry, "steps": list(map(step_to_dict, recipe.steps_list)),
-                        "boil_started_at": CookBook.get_instance().selected_recipe.boil_started_at})
+                        "boil_started_at": CookBook.get_instance().selected_recipe.boil_started_at,
+                        "bs_code_valid": Security.check_code(request.headers.get(config.BREW_SESSION_CODE_HEADER))})
 
     @app.doc(tags=['Brew session status'])
     async def delete(self):
@@ -150,6 +169,7 @@ class ScaleRes(Resource):
 @app.route('/discover-varpivo')
 class Discover(Resource):
     @app.doc(tags=['Info'])
+    @app.param(config.BREW_SESSION_CODE_HEADER, 'Brew session code', _in='header')
     @app.response(HTTPStatus.OK, description='', validator=app.create_validator('message', message_model))
     async def get(self):
         """Used to check if this is a Var:Pivo server, or to ping"""

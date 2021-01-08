@@ -150,6 +150,9 @@ brew_session_model = {
         "recipe": recipe_model,
         "boil_started_at": {
             "type": "number"
+        },
+        "bs_code_valid": {
+            "type": "boolean"
         }
     }
 }

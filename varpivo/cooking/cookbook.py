@@ -36,6 +36,7 @@ class CookBook:
 
             await event_queue.put(Event(Event.WS, payload=event.payload.to_keg()))
             if brewing_finished:
+                await event_queue.put(Event(Event.BREW_SESSION_FINISHED, None))
                 CookBook.get_instance().unselect_recipe()
 
     def __init__(self) -> None:
@@ -58,10 +59,11 @@ class CookBook:
                 self.recipes[id] = Recipe(id=id, recipe=recipe)
         self.recipes['test-recipe'] = TestRecipe()
 
-    def select_recipe(self, recipeId):
+    async def select_recipe(self, recipeId):
         if self.selected_recipe:
             return False
         self.selected_recipe = self[recipeId]
+        await event_queue.put(Event(Event.BREW_SESSION_STARTED, None))
         return True
 
     def unselect_recipe(self):
