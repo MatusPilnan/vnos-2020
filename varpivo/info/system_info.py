@@ -2,6 +2,7 @@ import asyncio
 import json
 from typing import List
 
+from varpivo.config import config
 from varpivo.hardware.heater import Heater
 from varpivo.hardware.scale import Scale
 from varpivo.hardware.thermometer import Thermometer
@@ -29,7 +30,7 @@ class SystemInfo:
         self._temperature = None
         self._heating = None
         self._weight = None
-        self.addresses = []
+        self.addresses = [f'127.0.0.1:{config.PORT}']
 
     @staticmethod
     def add_observer(observer, properties: List[int] = None):
