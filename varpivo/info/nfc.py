@@ -28,6 +28,7 @@ class NFCTagEmulator:
         SystemInfo.add_observer(self.request_ndef_update, SystemInfo.ADDRESSES)
 
     def update_ndef_record(self):
+        # noinspection PyUnresolvedReferences
         import ndef
         record = ndef.UriRecord(f"{config.FRONTEND_URL}?connections={json.dumps(SystemInfo.get_instance().addresses)}")
 
@@ -90,5 +91,5 @@ class NFCPlaceholder(NFCTagEmulator):
         self.logger.info(
             f"NDEF URL updated: {config.FRONTEND_URL}?connections={json.dumps(SystemInfo.get_instance().addresses)}")
 
-    def stop(self):
+    async def stop(self):
         pass
