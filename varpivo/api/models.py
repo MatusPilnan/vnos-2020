@@ -144,7 +144,7 @@ recipe_steps_model = {
 brew_session_model = {
     "type": "object",
     "title": "BrewSession",
-    "required": ["steps", "recipe"],
+    "required": ["steps", "recipe", "bs_code_valid"],
     "properties": {
         "steps": step_list_property,
         "recipe": recipe_model,

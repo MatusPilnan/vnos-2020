@@ -18,7 +18,7 @@ def brew_session_code_required(func):
     async def check(*args, **kwargs):
         if not Security.check_code(request.headers.get(config.BREW_SESSION_CODE_HEADER)):
             return jsonify({'error': "Missing or invalid brew session code"}), HTTPStatus.UNAUTHORIZED
-        return func(*args, **kwargs)
+        return await func(*args, **kwargs)
 
     check.__doc__ = func.__doc__
     check.__name__ = func.__name__
@@ -134,6 +134,8 @@ class BrewStatus(Resource):
                         "bs_code_valid": Security.check_code(request.headers.get(config.BREW_SESSION_CODE_HEADER))})
 
     @app.doc(tags=['Brew session status'])
+    @app.param(config.BREW_SESSION_CODE_HEADER, 'Brew session code', _in='header')
+    @brew_session_code_required
     async def delete(self):
         """Reset state - unselect any selected recipe"""
         CookBook.get_instance().unselect_recipe()
@@ -144,6 +146,8 @@ class BrewStatus(Resource):
 class ScaleRes(Resource):
     @app.param('grams', description='Real weight used for calibration', required=True, schema={"type": "integer"})
     @app.doc(tags=['Scale'])
+    @app.param(config.BREW_SESSION_CODE_HEADER, 'Brew session code', _in='header')
+    @brew_session_code_required
     async def patch(self):
         """Start scale calibration"""
         weight = request.args['grams']
@@ -152,6 +156,8 @@ class ScaleRes(Resource):
         return jsonify({}), HTTPStatus.NO_CONTENT
 
     @app.doc(tags=['Scale'])
+    @app.param(config.BREW_SESSION_CODE_HEADER, 'Brew session code', _in='header')
+    @brew_session_code_required
     async def put(self):
         """Find scale reference units, after weight was PUT on the scale"""
         if not Scale.get_instance().calibrating:
@@ -160,6 +166,8 @@ class ScaleRes(Resource):
         return jsonify({}), HTTPStatus.NO_CONTENT
 
     @app.doc(tags=['Scale'])
+    @app.param(config.BREW_SESSION_CODE_HEADER, 'Brew session code', _in='header')
+    @brew_session_code_required
     async def delete(self):
         """Tare the scale"""
         Scale.get_instance().tare()
@@ -169,10 +177,20 @@ class ScaleRes(Resource):
 @app.route('/discover-varpivo')
 class Discover(Resource):
     @app.doc(tags=['Info'])
-    @app.param(config.BREW_SESSION_CODE_HEADER, 'Brew session code', _in='header')
     @app.response(HTTPStatus.OK, description='', validator=app.create_validator('message', message_model))
     async def get(self):
         """Used to check if this is a Var:Pivo server, or to ping"""
+        return jsonify({"message": "OK"})
+
+
+@app.route('/auth')
+class Auth(Resource):
+    @app.doc(tags=['Info'])
+    @app.param(config.BREW_SESSION_CODE_HEADER, 'Brew session code', _in='header')
+    @app.response(HTTPStatus.OK, description='', validator=app.create_validator('message', message_model))
+    @brew_session_code_required
+    async def get(self):
+        """Used to check if brew session key code is valid"""
         return jsonify({"message": "OK"})
 
 
