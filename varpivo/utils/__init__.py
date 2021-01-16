@@ -16,6 +16,8 @@ def prepare_recipe_files(recipe_files):
 
 class Event:
     CALIBRATION_READY = "CALIBRATION_READY"
+    BREW_SESSION_STARTED = "BREW_SESSION_STARTED"
+    BREW_SESSION_FINISHED = "BREW_SESSION_FINISHED"
     STEP = "STEP"
     WS = "WS"
 

@@ -13,11 +13,14 @@ from varpivo.hardware.display import Display
 from varpivo.hardware.heater import Heater
 from varpivo.hardware.scale import Scale
 from varpivo.hardware.thermometer import Thermometer
+from varpivo.security.security import Security
 from varpivo.utils import Event
 
 app = Pint(__name__, title="Var:Pivo API")
 app.config['SERVER_NAME'] = "127.0.0.1:5000"
 app = cors(app, allow_origin='*')
+app.logger.setLevel('INFO')
+Security.get_instance()
 
 
 @app.route('/')
@@ -32,7 +35,7 @@ async def ws_observer(event):
 
 connected_websockets = set()
 event_queue = Queue(loop=loop)
-event_observers = {ws_observer, Scale.calibration_observer}
+event_observers = {ws_observer, Scale.calibration_observer, Security.security_observer}
 
 
 def collect_websocket(func):

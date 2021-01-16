@@ -43,3 +43,24 @@ def get_selected_recipe():
         return None
     checkpoint = get_checkpoint(RECIPE_CHECKPOINT_FILE)
     return {"recipe": checkpoint["recipe"], "time": checkpoint["time"]}
+
+
+def save_security(security):
+    checkpoint = get_checkpoint(SECURITY_CHECKPOINT_FILE)
+    checkpoint['code'] = security.brew_session_code
+    checkpoint['time'] = time()
+    checkpoint.close()
+
+
+def load_security():
+    checkpoint_location = os.path.join(CHECKPOINT_DIR, SECURITY_CHECKPOINT_FILE)
+    if not glob(checkpoint_location + '*'):
+        return None, None
+    checkpoint = get_checkpoint(SECURITY_CHECKPOINT_FILE)
+    return checkpoint['code'], checkpoint['time']
+
+
+def discard_security():
+    checkpoint_location = os.path.join(CHECKPOINT_DIR, SECURITY_CHECKPOINT_FILE)
+    for file in glob(checkpoint_location + '*'):
+        os.remove(file)
