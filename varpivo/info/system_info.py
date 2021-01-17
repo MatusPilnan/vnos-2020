@@ -6,6 +6,7 @@ from varpivo.config import config
 from varpivo.hardware.heater import Heater
 from varpivo.hardware.scale import Scale
 from varpivo.hardware.thermometer import Thermometer
+from varpivo.security.security import Security
 from varpivo.utils.network import get_local_ip, get_public_ip
 
 
@@ -16,6 +17,7 @@ class SystemInfo:
     WEIGHT = 1
     HEATING = 2
     ADDRESSES = 3
+    BREW_SESSION_CODE = 4
 
     @staticmethod
     def get_instance():
@@ -74,6 +76,10 @@ class SystemInfo:
         self.addresses.append(get_local_ip())
         self.addresses.append(await get_public_ip())
         self.changed_properties.add(SystemInfo.ADDRESSES)
+
+    @property
+    def brew_session_code(self):
+        return Security.get_instance().brew_session_code
 
     @property
     def temperature(self):

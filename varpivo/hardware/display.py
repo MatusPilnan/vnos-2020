@@ -24,9 +24,9 @@ class Display:
         # noinspection PyUnresolvedReferences
         from luma.oled.device import sh1106
 
-        serial = i2c(port=1, address=0x3C)
+        serial = i2c(port=config.DISPLAY_I2C_PORT, address=config.DISPLAY_I2C_ADDRESS)
         self.device = sh1106(serial)
-        self.screens = [SummaryScreen(self.device), NetworkScreen(self.device)]
+        self.screens = [SummaryScreen(self.device), NetworkScreen(self.device), SecurityScreen(self.device)]
         self._current_screen = 0
         StartupScreen(self.device).show()
         self.screens[self._current_screen].observe_sys_info()
@@ -116,6 +116,25 @@ class NetworkScreen(Screen):
         with canvas(self.display) as draw:
             draw.rectangle(self.display.bounding_box, outline="black", fill="black")
             draw.text((5, 5), message, fill="white")
+
+
+class SecurityScreen(Screen):
+    observed_properties = [SystemInfo.BREW_SESSION_CODE]
+
+    def __init__(self, display=None):
+        super().__init__(display)
+
+        from PIL import ImageFont
+        self.font = ImageFont.truetype(config.SECURITY_CODE_FONT_FILE, 30)
+
+    def show(self):
+        # noinspection PyUnresolvedReferences
+        from luma.core.render import canvas
+
+        with canvas(self.display) as draw:
+            draw.rectangle(self.display.bounding_box, outline="black", fill="black")
+            draw.text((5, 5), "Brew session code:", fill="white")
+            draw.text((5, 25), f"{SystemInfo.get_instance().brew_session_code}", fill="white", font=self.font)
 
 
 class StartupScreen(Screen):
