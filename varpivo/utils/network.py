@@ -15,7 +15,7 @@ def get_local_ip():
         ip = '127.0.0.1'
     finally:
         s.close()
-    return f'{ip}:{config.PORT}'
+    return f'{ip}'
 
 
 async def get_public_ip():
