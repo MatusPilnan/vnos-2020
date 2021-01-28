@@ -19,7 +19,7 @@ SECURITY_CHECKPOINT_FILE = "shelf.security"
 
 NDEF_FILE = 'out/ndef_file'
 SECURITY_CODE_FONT_FILE = '/usr/share/fonts/truetype/noto/NotoMono-Regular.ttf'
-DISPLAY_CYCLE_INTERVAL = 120
+SCREEN_CYCLE_INTERVAL = 120
 DISPLAY_I2C_PORT = 0
 DISPLAY_I2C_ADDRESS = 0x3C
 

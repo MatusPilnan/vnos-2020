@@ -1,8 +1,4 @@
-import asyncio
-import logging
-
 from varpivo.config import config
-from varpivo.info.system_info import SystemInfo
 
 
 class Display:
@@ -26,39 +22,13 @@ class Display:
 
         serial = i2c(port=config.DISPLAY_I2C_PORT, address=config.DISPLAY_I2C_ADDRESS)
         self.device = sh1106(serial)
-        self.screens = [SummaryScreen(self.device), NetworkScreen(self.device), SecurityScreen(self.device)]
-        self._current_screen = 0
-        StartupScreen(self.device).show()
-        self.screens[self._current_screen].observe_sys_info()
 
     @property
-    def current_screen(self):
-        return self._current_screen
+    def dimensions(self):
+        return self.device.width, self.device.height
 
-    @current_screen.setter
-    def current_screen(self, val):
-        self.screens[self._current_screen].stop_observing()
-        if val < 0:
-            val += len(self.screens)
-
-        val = val % len(self.screens)
-        self._current_screen = val
-        self.screens[self._current_screen].show()
-        self.screens[self._current_screen].observe_sys_info()
-
-    @staticmethod
-    async def cycle_screens():
-        while True:
-            Display.next_screen()
-            await asyncio.sleep(config.DISPLAY_CYCLE_INTERVAL)
-
-    @staticmethod
-    def next_screen():
-        Display.get_instance().current_screen += 1
-
-    @staticmethod
-    def previous_screen():
-        Display.get_instance().current_screen -= 1
+    def show(self, screen):
+        self.device.display(screen.image)
 
 
 class EmulatedDisplay(Display):
@@ -71,83 +41,3 @@ class EmulatedDisplay(Display):
         pass
 
 
-class Screen:
-    observed_properties = [SystemInfo.ANY]
-
-    def __init__(self, display=None):
-        self.display = display
-
-    def observe_sys_info(self):
-        SystemInfo.add_observer(self.show, self.observed_properties)
-
-    def stop_observing(self):
-        SystemInfo.remove_observer(self.show)
-
-    def show(self):
-        pass
-
-
-class SummaryScreen(Screen):
-    observed_properties = [SystemInfo.TEMPERATURE, SystemInfo.HEATING, SystemInfo.WEIGHT]
-
-    def show(self):
-        # noinspection PyUnresolvedReferences
-        from luma.core.render import canvas
-
-        info = SystemInfo.get_instance()
-        message = f'Temperature: {info.temperature}°C\n' \
-                  f'Heater {"on" if info.heating else "off"}\n' \
-                  f'Weight: {info.weight} g'
-
-        with canvas(self.display) as draw:
-            draw.rectangle(self.display.bounding_box, outline="black", fill="black")
-            draw.text((5, 15), message, fill="white")
-
-
-class NetworkScreen(Screen):
-    observed_properties = [SystemInfo.ADDRESSES]
-
-    def show(self):
-        # noinspection PyUnresolvedReferences
-        from luma.core.render import canvas
-
-        message = 'IP Addresses:\n' + '\n'.join(SystemInfo.get_instance().addresses)
-
-        with canvas(self.display) as draw:
-            draw.rectangle(self.display.bounding_box, outline="black", fill="black")
-            draw.text((5, 5), message, fill="white")
-
-
-class SecurityScreen(Screen):
-    observed_properties = [SystemInfo.BREW_SESSION_CODE]
-
-    def __init__(self, display=None):
-        super().__init__(display)
-
-        from PIL import ImageFont
-        self.font = ImageFont.truetype(config.SECURITY_CODE_FONT_FILE, 30)
-
-    def show(self):
-        # noinspection PyUnresolvedReferences
-        from luma.core.render import canvas
-
-        with canvas(self.display) as draw:
-            draw.rectangle(self.display.bounding_box, outline="black", fill="black")
-            draw.text((5, 5), "Brew session code:", fill="white")
-            draw.text((5, 25), f"{SystemInfo.get_instance().brew_session_code}", fill="white", font=self.font)
-
-
-class StartupScreen(Screen):
-    def show(self):
-        # noinspection PyBroadException
-        try:
-            # noinspection PyUnresolvedReferences
-            from PIL import Image
-
-            with Image.open('varpivo.jpg') as img:
-                background = Image.new(mode='1', size=(self.display.width, self.display.height))
-                position = ((self.display.width - img.width) // 2, (self.display.height - img.height) // 2)
-                background.paste(img, position)
-                self.display.display(background)
-        except Exception:
-            logging.getLogger('quart.app').info('Not showing splashscreen')

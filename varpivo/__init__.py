@@ -15,8 +15,9 @@ from varpivo.hardware.heater import Heater
 from varpivo.hardware.scale import Scale
 from varpivo.hardware.thermometer import Thermometer
 from varpivo.info.nfc import NFCTagEmulator
-from varpivo.security.security import Security
 from varpivo.info.system_info import SystemInfo
+from varpivo.security.security import Security
+from varpivo.ui import UserInterface
 from varpivo.utils import Event
 
 app = Pint(__name__, title="Var:Pivo API")
@@ -109,12 +110,12 @@ from quart_openapi import OpenApiView
 
 SystemInfo.add_observer(send_temperature, [SystemInfo.TEMPERATURE, SystemInfo.HEATING])
 SystemInfo.add_observer(send_weight, [SystemInfo.WEIGHT])
-Buttons.add_callback(Display.next_screen, config.BUTTON_NEXT_GPIO)
-Buttons.add_callback(Display.previous_screen, config.BUTTON_PREV_GPIO)
+Buttons.add_callback(UserInterface.next_screen, config.BUTTON_NEXT_GPIO)
+Buttons.add_callback(UserInterface.previous_screen, config.BUTTON_PREV_GPIO)
 
 asyncio.ensure_future(SystemInfo.collect_info())
 asyncio.ensure_future(observe())
-asyncio.ensure_future(Buttons.get_instance().listen_for_buttons())
+asyncio.ensure_future(UserInterface.cycle_screens())
 asyncio.ensure_future(NFCTagEmulator.get_instance().run_nfc_tag_emulator())
 
 
