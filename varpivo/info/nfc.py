@@ -39,7 +39,7 @@ class NFCTagEmulator:
                 pass
         self.ndef_update = False
 
-    async def request_ndef_update(self):
+    async def request_ndef_update(self, **kwargs):
         self.ndef_update = True
         self.logger.info('NDEF record update requested')
         await self.stop()
@@ -91,7 +91,7 @@ class NFCPlaceholder(NFCTagEmulator):
     async def run_nfc_tag_emulator(self):
         pass
 
-    async def request_ndef_update(self):
+    async def request_ndef_update(self, **kwargs):
         self.logger.info(
             f"NDEF URL updated: {config.FRONTEND_URL}?connections={json.dumps(SystemInfo.get_instance().addresses)}")
 

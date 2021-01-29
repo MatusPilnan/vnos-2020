@@ -25,7 +25,7 @@ app.config['SERVER_NAME'] = "127.0.0.1:5000"
 app = cors(app, allow_origin='*')
 app.logger.setLevel('INFO')
 Security.get_instance()
-Display.get_instance()
+UserInterface.get_instance()
 
 
 @app.route('/')
@@ -40,6 +40,7 @@ async def ws_observer(event):
 
 connected_websockets = set()
 event_queue = Queue(loop=loop)
+Buttons.get_instance()
 event_observers = {ws_observer, Scale.calibration_observer, Security.security_observer}
 
 
@@ -76,12 +77,12 @@ async def broadcast(message):
         await queue.put(message)
 
 
-async def send_weight():
+async def send_weight(**kwargs):
     weight, message = await SystemInfo.weight_to_keg()
     await broadcast(message)
 
 
-async def send_temperature():
+async def send_temperature(**kwargs):
     temperature, heating, message = await SystemInfo.temperature_to_keg()
     await broadcast(message)
 
@@ -110,8 +111,6 @@ from quart_openapi import OpenApiView
 
 SystemInfo.add_observer(send_temperature, [SystemInfo.TEMPERATURE, SystemInfo.HEATING])
 SystemInfo.add_observer(send_weight, [SystemInfo.WEIGHT])
-Buttons.add_callback(UserInterface.next_screen, config.BUTTON_NEXT_GPIO)
-Buttons.add_callback(UserInterface.previous_screen, config.BUTTON_PREV_GPIO)
 
 asyncio.ensure_future(SystemInfo.collect_info())
 asyncio.ensure_future(observe())

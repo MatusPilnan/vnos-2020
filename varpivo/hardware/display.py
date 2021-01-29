@@ -37,7 +37,5 @@ class EmulatedDisplay(Display):
     def __init__(self):
         print('No display detected.')
 
-    def show(self, **kwargs):
+    def show(self, screen):
         pass
-
-

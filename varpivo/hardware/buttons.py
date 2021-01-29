@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 from varpivo.config import config
@@ -8,17 +7,26 @@ class Button:
     def __init__(self, pin, name=None) -> None:
         if not name:
             name = f'GPIO-{pin}'
+        self.name = name
         self.pin = pin
         self.callbacks = {lambda: logging.getLogger('quart.app').debug(f'Pressed {name} button')}
-        self.pressed = False
+        # noinspection PyUnresolvedReferences
+        import RPi.GPIO as GPIO
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.add_event_detect(pin, GPIO.RISING, callback=Buttons.execute_callbacks, bouncetime=500)
 
 
 class Buttons:
+    NEXT = "NEXT"
+    PREVIOUS = "PREVIOUS"
+    UP = "UP"
+    DOWN = "DOWN"
+    ACTION = "ACTION"
+
     __instance = None
-    __button_pins = {
-        config.BUTTON_NEXT_GPIO: Button(config.BUTTON_NEXT_GPIO, 'NEXT'),
-        config.BUTTON_PREV_GPIO: Button(config.BUTTON_NEXT_GPIO, 'PREVIOUS')
-    }
+    __button_pins = None
+    generic_callbacks = set()
 
     @staticmethod
     def get_instance():
@@ -37,29 +45,18 @@ class Buttons:
         # noinspection PyUnresolvedReferences
         import RPi.GPIO as GPIO
         GPIO.setmode(GPIO.BCM)
-
-    async def listen_for_buttons(self):
-        # noinspection PyUnresolvedReferences
-        import RPi.GPIO as GPIO
-        GPIO.setmode(GPIO.BCM)
-        for pin in Buttons.__button_pins:
-            GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-
-        while True:
-            for button in Buttons.__button_pins.values():
-                if GPIO.input(button.pin):
-                    if not button.pressed:
-                        button.pressed = True
-                        for callback in button.callbacks:
-                            callback()
-                else:
-                    button.pressed = False
-
-            await asyncio.sleep(0.1)
+        Buttons.__button_pins = {
+            config.BUTTON_NEXT_GPIO: Button(config.BUTTON_NEXT_GPIO, Buttons.NEXT),
+            config.BUTTON_PREV_GPIO: Button(config.BUTTON_PREV_GPIO, Buttons.PREVIOUS)
+        }
 
     @staticmethod
-    def add_callback(func, button_gpio):
-        Buttons.__button_pins[button_gpio].callbacks.add(func)
+    def execute_callbacks(pin):
+        button = Buttons.__button_pins[pin]
+        for callback in Buttons.generic_callbacks:
+            callback(button.name)
+        for callback in button.callbacks:
+            callback()
 
 
 class EmulatedButtons(Buttons):
@@ -67,6 +64,3 @@ class EmulatedButtons(Buttons):
     def __init__(self):
         logging.getLogger('quart.app').info('Using emulated buttons.')
 
-    async def listen_for_buttons(self):
-        while True:
-            await asyncio.sleep(120)

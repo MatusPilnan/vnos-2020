@@ -1,3 +1,5 @@
+import logging
+
 from PIL import Image, ImageDraw, ImageFont
 
 from varpivo.config import config
@@ -12,6 +14,15 @@ class Screen:
         self.rect = [(0, 0), self.image.size]
 
     def redraw(self):
+        pass
+
+    def up(self):
+        pass
+
+    def down(self):
+        pass
+
+    def action(self):
         pass
 
 
@@ -46,7 +57,11 @@ class SecurityScreen(Screen):
 
     def __init__(self):
         super().__init__()
-        self.font = ImageFont.truetype(config.SECURITY_CODE_FONT_FILE, 30)
+        try:
+            self.font = ImageFont.truetype(config.SECURITY_CODE_FONT_FILE, 30)
+        except OSError:
+            self.font = None
+            logging.getLogger('quart.app').info('Could not load security code font.')
 
     def redraw(self):
         draw = ImageDraw.Draw(self.image)
@@ -66,3 +81,4 @@ class StartupScreen(Screen):
 
     def redraw(self):
         pass
+

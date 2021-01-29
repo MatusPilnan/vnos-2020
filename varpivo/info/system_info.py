@@ -67,9 +67,9 @@ class SystemInfo:
         for observer in self.observers:
             if observer.func and self.changed_properties.intersection(observer.observed_properties):
                 if asyncio.iscoroutinefunction(observer.func):
-                    await observer.func()
+                    await observer.func(changed=self.changed_properties)
                 else:
-                    observer.func()
+                    observer.func(changed=self.changed_properties)
 
     async def resolve_ip_addresses(self):
         self.addresses.append(get_local_ip())
