@@ -20,6 +20,7 @@ class Event:
     BREW_SESSION_FINISHED = "BREW_SESSION_FINISHED"
     STEP = "STEP"
     WS = "WS"
+    BUTTON_PRESSED = "BUTTON_PRESSED"
 
     def __init__(self, event_type, payload) -> None:
         super().__init__()

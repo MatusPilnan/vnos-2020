@@ -16,3 +16,12 @@ CHECKPOINT_DIR = 'shelf'
 RECIPE_CHECKPOINT_FILE = "shelf.page"
 KETTLE_CHECKPOINT_FILE = "shelf.kettle"
 SECURITY_CHECKPOINT_FILE = "shelf.security"
+
+NDEF_FILE = 'out/ndef_file'
+SECURITY_CODE_FONT_FILE = '/usr/share/fonts/truetype/noto/NotoMono-Regular.ttf'
+SCREEN_CYCLE_INTERVAL = 120
+DISPLAY_I2C_PORT = 0
+DISPLAY_I2C_ADDRESS = 0x3C
+
+BUTTON_NEXT_GPIO = 21
+BUTTON_PREV_GPIO = 20
