@@ -1,8 +1,11 @@
 import asyncio
 
 from varpivo.hardware.buttons import Buttons
+from varpivo.hardware.buzzer import Buzzer
 from varpivo.hardware.display import Display
 from varpivo.ui.screens import *
+from varpivo.utils import Event
+from varpivo.utils.sounds import Songs
 
 
 class UserInterface:
@@ -74,3 +77,9 @@ class UserInterface:
             UserInterface.get_instance().current_screen.action()
         else:
             logging.getLogger('quart.app').info(f'Unknown button pressed: {button_pressed}')
+
+    @staticmethod
+    async def event_observer(event: Event):
+        if event.event_type[0] == Event.STEP_AUTOSTART:
+            if event.payload.manual:
+                asyncio.ensure_future(Buzzer.get_instance().play_melody(song=Songs.PIVO))

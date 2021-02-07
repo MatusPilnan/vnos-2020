@@ -10,10 +10,12 @@ Quart~=0.13.1
 quart_openapi
 quart_cors
 swagger-ui-py
-httpx
+httpx~=0.16.1
 
 hx711~=0.1
 w1thermsensor~=2.0.0a2
 ndeflib
 luma
-Pillow
+Pillow~=5.4.1
+
+rtttl~=0.2

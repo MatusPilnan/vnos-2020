@@ -13,6 +13,7 @@ class Step:
     progress = None
     estimation = None
     kind = 'generic'
+    manual = True
     target = None
 
     def __init__(self, name: str, description: str, duration: int, dependencies=None) -> None:
@@ -62,6 +63,7 @@ class Step:
         await event_queue.put(Event(Event.STEP, payload=self))
         for next_step in self.next_steps:
             if next_step.available:
+                await event_queue.put(Event(Event.STEP_AUTOSTART, payload=next_step))
                 await next_step.start()
 
     def reset(self):
@@ -79,6 +81,7 @@ class AddWater(Step):
 
 class SetTemperature(Step):
     kind = 'set_temperature'
+    manual = False
 
     def __init__(self, target: int, dependencies=None) -> None:
         super().__init__(name=f'Heat water: {target:.2f} C', description=f'Heat water to {target:.2f}°C.',
@@ -114,6 +117,7 @@ class WeighIngredient(Step):
 
 class KeepTemperature(Step):
     kind = 'keep_temperature'
+    manual = False
 
     def __init__(self, name: str, duration: int, dependencies=None) -> None:
         super().__init__(name=name, description=f"Keep temperature for {duration} minutes.", duration=duration,

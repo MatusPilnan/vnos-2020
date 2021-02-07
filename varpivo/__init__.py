@@ -10,6 +10,7 @@ from swagger_ui import quart_api_doc
 from main import loop
 from varpivo.config import config
 from varpivo.hardware.buttons import Buttons
+from varpivo.hardware.buzzer import Buzzer
 from varpivo.hardware.display import Display
 from varpivo.hardware.heater import Heater
 from varpivo.hardware.scale import Scale
@@ -19,6 +20,7 @@ from varpivo.info.system_info import SystemInfo
 from varpivo.security.security import Security
 from varpivo.ui import UserInterface
 from varpivo.utils import Event
+from varpivo.utils.sounds import Songs
 
 app = Pint(__name__, title="Var:Pivo API")
 app.config['SERVER_NAME'] = "127.0.0.1:5000"
@@ -41,7 +43,7 @@ async def ws_observer(event):
 connected_websockets = set()
 event_queue = Queue(loop=loop)
 Buttons.get_instance()
-event_observers = {ws_observer, Scale.calibration_observer, Security.security_observer}
+event_observers = {ws_observer, Scale.calibration_observer, Security.security_observer, UserInterface.event_observer}
 
 
 def collect_websocket(func):
