@@ -53,6 +53,8 @@ class Songs:
         Note(get_tone('E'), 600),
         Note(get_tone('D'), 400),
     ]
+    JA_PIJEM_PIVO = from_rtttl(
+        "ja pijem p:d=4,o=4,b=160:b4,f#,e,e,8d,d,b4,p.,b4,8b4,8f#,e,e,8d,d,b4,p.,b4,f#,e,e,8d,d,b4,8p,8d,8b4,8d,8b4,8d,8b4,p,8d,8a4,8p,b4")
 
     WALK_OF_LIFE = from_rtttl(
         "WalkOfLi:d=4,o=5,b=140:g#6,16p,8g#6,2p,16f#.6,16g#.6,8b.6,16g#.6,16f#.6,8p,e6,16p,8e6,1p,16f#.6,16g#.6,b6,16p,8b6,2p,16f#.6,16g#.6,8b.6,16g#6,8f#6,8p,e6,16p,8e6,2p,16f#.6,16g#.6,8b.6,16g#.6,16f#.6,16e.6,b6,16p,8b6,2p,16f#.6,16g#.6,8b.6,16g#.6,16f#.6,8p,e6,16p,8e6,1p,16f#.6,16g#.6,b6,16p,8b6,2p,16f#.6,16g#.6,8b.6,16g#.6,16f#.6,8p,e6,16p,8e6,2p,16f#.6,16g#.6,8b.6,16g#.6,16f#.6,16e.6,32p,8b6,16p,b6")

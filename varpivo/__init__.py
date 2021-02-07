@@ -10,7 +10,6 @@ from swagger_ui import quart_api_doc
 from main import loop
 from varpivo.config import config
 from varpivo.hardware.buttons import Buttons
-from varpivo.hardware.buzzer import Buzzer
 from varpivo.hardware.display import Display
 from varpivo.hardware.heater import Heater
 from varpivo.hardware.scale import Scale
@@ -118,7 +117,6 @@ asyncio.ensure_future(SystemInfo.collect_info())
 asyncio.ensure_future(observe())
 asyncio.ensure_future(UserInterface.cycle_screens())
 asyncio.ensure_future(NFCTagEmulator.get_instance().run_nfc_tag_emulator())
-
 
 @app.route('/api/doc/swagger.json')
 async def swagger():

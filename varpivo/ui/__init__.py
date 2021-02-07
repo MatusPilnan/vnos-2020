@@ -83,3 +83,6 @@ class UserInterface:
         if event.event_type[0] == Event.STEP_AUTOSTART:
             if event.payload.manual:
                 asyncio.ensure_future(Buzzer.get_instance().play_melody(song=Songs.PIVO))
+
+        elif event.event_type[0] == Event.BREW_SESSION_FINISHED:
+            asyncio.ensure_future(Buzzer.get_instance().play_melody(Songs.JA_PIJEM_PIVO))
