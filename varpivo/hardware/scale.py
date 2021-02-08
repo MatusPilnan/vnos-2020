@@ -3,6 +3,7 @@ import json
 from random import random
 from statistics import mean
 
+from varpivo.config import config
 from varpivo.config.config import SCALE_CALIBRATION_FILE, SCALE_CALIBRATION_ERROR_THRESHOLD
 from varpivo.utils import Event
 
@@ -13,11 +14,13 @@ class Scale:
     calibrating = False
 
     @staticmethod
-    def get_instance():
+    async def get_instance():
         if Scale.__instance is None:
             try:
-                Scale()
-            except ModuleNotFoundError:
+                Scale.__instance = Scale()
+                await asyncio.wait_for(asyncio.get_running_loop().run_in_executor(None, Scale.__instance.init_sensor),
+                                       config.SCALE_INIT_TIMEOUT)
+            except (ModuleNotFoundError, asyncio.TimeoutError):
                 Scale.__instance = EmulatedScale()
 
         return Scale.__instance
@@ -30,7 +33,6 @@ class Scale:
             raise Exception("This class is a singleton!")
         else:
             self.hx = None
-            self.init_sensor()
             Scale.__instance = self
 
     def init_sensor(self):
@@ -109,7 +111,7 @@ class Scale:
     @staticmethod
     async def calibration_observer(event):
         if event.event_type[0] == Event.CALIBRATION_READY:
-            await Scale.get_instance().find_reference_units(Scale.calibration_weight)
+            await (await Scale.get_instance()).find_reference_units(Scale.calibration_weight)
 
 
 class EmulatedScale(Scale):

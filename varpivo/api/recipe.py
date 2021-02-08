@@ -151,7 +151,7 @@ class ScaleRes(Resource):
     async def patch(self):
         """Start scale calibration"""
         weight = request.args['grams']
-        Scale.get_instance().start_calibration(int(weight))
+        (await Scale.get_instance()).start_calibration(int(weight))
         await event_queue.put(Event(Event.WS, payload=json.dumps({"content": "calibration", "payload": "ready"})))
         return jsonify({}), HTTPStatus.NO_CONTENT
 
@@ -160,7 +160,7 @@ class ScaleRes(Resource):
     @brew_session_code_required
     async def put(self):
         """Find scale reference units, after weight was PUT on the scale"""
-        if not Scale.get_instance().calibrating:
+        if not (await Scale.get_instance()).calibrating:
             return jsonify({"error": 'Calibration not started'}), HTTPStatus.FAILED_DEPENDENCY
         await event_queue.put(Event(Event.CALIBRATION_READY, payload=None))
         return jsonify({}), HTTPStatus.NO_CONTENT
@@ -170,7 +170,7 @@ class ScaleRes(Resource):
     @brew_session_code_required
     async def delete(self):
         """Tare the scale"""
-        Scale.get_instance().tare()
+        (await Scale.get_instance()).tare()
         return jsonify({}), HTTPStatus.NO_CONTENT
 
 

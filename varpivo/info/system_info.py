@@ -54,7 +54,7 @@ class SystemInfo:
         while True:
             instance.changed_properties = set()
             instance.temperature = round(await Thermometer.get_instance().temperature)
-            instance.weight = int(await Scale.get_instance().weight)
+            instance.weight = int(await (await Scale.get_instance()).weight)
             instance.heating = Heater.get_instance().heat
 
             await instance.notify_observers()

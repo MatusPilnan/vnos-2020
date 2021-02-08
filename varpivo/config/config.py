@@ -6,6 +6,7 @@ FRONTEND_URL = 'https://matuspilnan.github.io/varpivo-elm'
 RECIPES_DIR = 'recipes'
 SCALE_CALIBRATION_FILE = 'scale_calibration.json'
 SCALE_CALIBRATION_ERROR_THRESHOLD = 50
+SCALE_INIT_TIMEOUT = 5
 HEATER_RELAY_GPIO = 24
 
 DEFAULT_MASH_STEP_TIME = 60
