@@ -1,3 +1,4 @@
+import logging
 from random import random
 
 
@@ -13,10 +14,10 @@ class Thermometer:
                     from w1thermsensor import W1ThermSensor
                     Thermometer()
                 except NoSensorFoundError as e:
-                    print(e)
+                    logging.getLogger('quart.app').info(e)
                     EmulatedThermometer()
                 except KernelModuleLoadError as e:
-                    print(e)
+                    logging.getLogger('quart.app').info(e)
                     EmulatedThermometer()
             except ModuleNotFoundError:
                 EmulatedThermometer()
@@ -44,7 +45,7 @@ class Thermometer:
 
 class EmulatedThermometer(Thermometer):
     def init_sensor(self):
-        print('Using emulated thermometer!')
+        logging.getLogger('quart.app').info('Using emulated thermometer!')
 
     @property
     async def temperature(self):

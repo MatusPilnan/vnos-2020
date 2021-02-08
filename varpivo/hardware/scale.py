@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 from random import random
 from statistics import mean
 
@@ -45,7 +46,7 @@ class Scale:
                     self.hx.set_reference_unit_A(cal['a'])
                     self.hx.set_reference_unit_B(cal['b'])
             except FileNotFoundError:
-                print('Reference units for scale not found')
+                logging.getLogger('quart.app').info('Reference units for scale not found')
             self.hx.set_reading_format("MSB", "MSB")
             self.tare()
 
@@ -118,7 +119,7 @@ class EmulatedScale(Scale):
 
     # noinspection PyMissingConstructor
     def __init__(self) -> None:
-        print('Using emulated scale!')
+        logging.getLogger('quart.app').info('Using emulated scale!')
         pass
 
     def init_sensor(self):
@@ -132,7 +133,7 @@ class EmulatedScale(Scale):
         pass
 
     async def start_calibration(self, grams):
-        print('emulated calibration')
+        logging.getLogger('quart.app').debug('emulated calibration')
 
     async def find_reference_units(self, grams):
         pass

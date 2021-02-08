@@ -79,10 +79,9 @@ class NFCPlaceholder(NFCTagEmulator):
     def __init__(self) -> None:
         SystemInfo.add_observer(self.request_ndef_update, SystemInfo.ADDRESSES)
         self.logger = logging.getLogger('quart.app')
-        self.logger.info(
-            f"NDEF URL: {config.FRONTEND_URL}"
-            f"?connections={json.dumps(SystemInfo.get_instance().addresses, separators=(',', ':'))}"
-            f"&brewSessionCode={SystemInfo.brew_session_code}")
+        self.logger.info(f"{config.FRONTEND_URL}"
+                         f"?connections={json.dumps(SystemInfo.get_instance().addresses, separators=(',', ':'))}"
+                         f"&brewSessionCode={SystemInfo.get_instance().brew_session_code}")
         self.logger.info('No NDEF module installed, NFC disabled')
 
     def __del__(self):
@@ -92,8 +91,9 @@ class NFCPlaceholder(NFCTagEmulator):
         pass
 
     async def request_ndef_update(self, **kwargs):
-        self.logger.info(
-            f"NDEF URL updated: {config.FRONTEND_URL}?connections={json.dumps(SystemInfo.get_instance().addresses)}")
+        self.logger.info(f"{config.FRONTEND_URL}"
+                         f"?connections={json.dumps(SystemInfo.get_instance().addresses, separators=(',', ':'))}"
+                         f"&brewSessionCode={SystemInfo.get_instance().brew_session_code}")
 
     async def stop(self):
         pass

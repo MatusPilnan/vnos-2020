@@ -29,3 +29,6 @@ BUTTON_PREV_GPIO = 20
 
 BUZZER_GPIO = 26
 BUZZER_DELAY = 0.5
+
+LOG_FOLDER = 'logs'
+LOG_FILE = 'varpivo.log'

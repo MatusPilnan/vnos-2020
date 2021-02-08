@@ -1,3 +1,5 @@
+import logging
+
 from varpivo.config.config import HEATER_RELAY_GPIO
 
 
@@ -42,7 +44,7 @@ class EmulatedHeater(Heater):
 
     # noinspection PyMissingConstructor
     def __init__(self):
-        print('Using emulated heater!')
+        logging.getLogger('quart.app').info('Using emulated heater!')
         self._heat = False
 
     @property

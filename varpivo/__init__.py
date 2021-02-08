@@ -2,7 +2,7 @@ import asyncio
 from asyncio import Queue
 from functools import wraps
 
-from quart import websocket, jsonify
+from quart import websocket, jsonify, make_response
 from quart_cors import cors
 from quart_openapi import Pint
 from swagger_ui import quart_api_doc
@@ -16,21 +16,24 @@ from varpivo.hardware.scale import Scale
 from varpivo.hardware.thermometer import Thermometer
 from varpivo.info.nfc import NFCTagEmulator
 from varpivo.info.system_info import SystemInfo
+from varpivo.logging import setup_logger, get_log_file, html_log_reader
 from varpivo.security.security import Security
 from varpivo.ui import UserInterface
 from varpivo.utils import Event
 from varpivo.utils.sounds import Songs
 
+UserInterface.get_instance()
+
 app = Pint(__name__, title="Var:Pivo API")
 app.config['SERVER_NAME'] = "127.0.0.1:5000"
 app = cors(app, allow_origin='*')
-app.logger.setLevel('INFO')
+setup_logger(app.logger)
 Security.get_instance()
-UserInterface.get_instance()
 
 
 @app.route('/')
 async def hello():
+    app.logger.info('Hello!')
     return 'hello'
 
 
@@ -54,7 +57,7 @@ def collect_websocket(func):
         try:
             return await func(queue, *args, **kwargs)
         except Exception as e:
-            print(e)
+            app.logger.exception(e)
         finally:
             connected_websockets.remove(queue)
 
@@ -97,14 +100,14 @@ async def observe():
 
 @app.after_serving
 async def shutdown():
-    print('Cleaning up...')
+    app.logger.info('Cleaning up...')
     await NFCTagEmulator.get_instance().stop()
     try:
         # noinspection PyUnresolvedReferences
         from RPi import GPIO
         GPIO.cleanup()
     except ModuleNotFoundError:
-        print("Or maybe not...")
+        app.logger.info("Or maybe not...")
 
 
 from varpivo.api import recipe
@@ -117,6 +120,14 @@ asyncio.ensure_future(SystemInfo.collect_info())
 asyncio.ensure_future(observe())
 asyncio.ensure_future(UserInterface.cycle_screens())
 asyncio.ensure_future(NFCTagEmulator.get_instance().run_nfc_tag_emulator())
+
+
+@app.route('/logstream')
+async def logstream():
+    response = await make_response(html_log_reader())
+    response.timeout = None
+    return response
+
 
 @app.route('/api/doc/swagger.json')
 async def swagger():

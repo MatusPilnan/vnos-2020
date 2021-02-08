@@ -1,3 +1,5 @@
+import logging
+
 from varpivo.config import config
 
 
@@ -35,7 +37,7 @@ class EmulatedDisplay(Display):
 
     # noinspection PyMissingConstructor
     def __init__(self):
-        print('No display detected.')
+        logging.getLogger('quart.app').info('No display detected.')
 
     def show(self, screen):
         pass
