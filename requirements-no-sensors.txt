@@ -10,3 +10,5 @@ quart_openapi
 quart_cors
 swagger-ui-py
 httpx
+rtttl~=0.2
+
