@@ -19,8 +19,8 @@ def get_local_ip():
     return f'{ip}'
 
 
-async def get_public_ip():
-    async with httpx.AsyncClient() as client:
+async def get_public_ip(timeout=5):
+    async with httpx.AsyncClient(timeout=timeout) as client:
         ip = (await client.get('https://api.ipify.org')).text
         return f'{ip}:{config.PUBLIC_PORT}'
 

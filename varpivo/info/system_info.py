@@ -1,6 +1,9 @@
 import asyncio
 import json
+import logging
 from typing import List
+
+import httpx
 
 from varpivo.hardware.heater import Heater
 from varpivo.hardware.scale import Scale
@@ -32,6 +35,7 @@ class SystemInfo:
         self._heating = None
         self._weight = None
         self.addresses = [f'127.0.0.1']
+        self.ip_timed_out = False
 
     @staticmethod
     def add_observer(observer, properties: List[int] = None):
@@ -56,6 +60,8 @@ class SystemInfo:
             instance.temperature = round(await Thermometer.get_instance().temperature)
             instance.weight = int(await (await Scale.get_instance()).weight)
             instance.heating = Heater.get_instance().heat
+            if instance.ip_timed_out:
+                await instance.resolve_ip_addresses(timeout=1)
 
             await instance.notify_observers()
             await asyncio.sleep(0.5)
@@ -71,9 +77,13 @@ class SystemInfo:
                 else:
                     observer.func(changed=self.changed_properties)
 
-    async def resolve_ip_addresses(self):
+    async def resolve_ip_addresses(self, timeout=5):
         self.addresses.append(get_local_ip())
-        self.addresses.append(await get_public_ip())
+        try:
+            self.addresses.append(await get_public_ip(timeout))
+        except httpx.ReadTimeout:
+            logging.getLogger('quart.app').warning('Public IP retrieval timed out.')
+            self.ip_timed_out = True
         self.changed_properties.add(SystemInfo.ADDRESSES)
 
     @property
