@@ -2,7 +2,7 @@ import asyncio
 from asyncio import Queue
 from functools import wraps
 
-from quart import websocket, jsonify, make_response
+from quart import websocket, jsonify, make_response, render_template, request
 from quart_cors import cors
 from quart_openapi import Pint
 from swagger_ui import quart_api_doc
@@ -16,10 +16,11 @@ from varpivo.hardware.scale import Scale
 from varpivo.hardware.thermometer import Thermometer
 from varpivo.info.nfc import NFCTagEmulator
 from varpivo.info.system_info import SystemInfo
-from varpivo.logging import setup_logger, get_log_file, html_log_reader
+from varpivo.logging import setup_logger, log_reader, stream_log_reader
 from varpivo.security.security import Security
 from varpivo.ui import UserInterface
 from varpivo.utils import Event
+from varpivo.utils.network import ServerSentEvent
 from varpivo.utils.sounds import Songs
 
 UserInterface.get_instance()
@@ -122,11 +123,18 @@ asyncio.ensure_future(UserInterface.cycle_screens())
 asyncio.ensure_future(NFCTagEmulator.get_instance().run_nfc_tag_emulator())
 
 
-@app.route('/logstream')
-async def logstream():
-    response = await make_response(html_log_reader())
-    response.timeout = None
-    return response
+@app.route('/logs')
+async def logs():
+    if 'text/event-stream' == request.accept_mimetypes.best:
+        response = await make_response(stream_log_reader(app.logger), {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Transfer-Encoding': 'chunked',
+        })
+        response.timeout = None
+        return response
+    else:
+        return await render_template('logstream.html', lines=log_reader(encode=False))
 
 
 @app.route('/api/doc/swagger.json')

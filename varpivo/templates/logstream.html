@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Var:Pivo Log Stream</title>
+    <style>
+        #logstream p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+<code id="title" style="white-space:pre-wrap;">
+    db db .d8b. d8888b. d8888b. d888888b db db .d88b.
+    88 88 d8' `8b 88 `8D db 88 `8D `88' 88 88 .8P Y8.
+    Y8 8P 88ooo88 88oobY' VP 88oodD' 88 Y8 8P 88 88
+    `8b d8' 88~~~88 88`8b 88~~~ 88 `8b d8' 88 88
+    `8bd8' 88 88 88 `88. db 88 .88. `8bd8' `8b d8'
+    YP YP YP 88 YD VP 88 Y888888P YP `Y88P'
+
+    ==============================================================
+    ==============================================================
+    __ _____ __
+    / / ____ ____ _ / ___// /_________ ____ _____ ___
+    / / / __ \/ __ `/ \__ \/ __/ ___/ _ \/ __ `/ __ `__ \
+    / /___/ /_/ / /_/ / ___/ / /_/ / / __/ /_/ / / / / / /
+    /_____/\____/\__, / /____/\__/_/ \___/\__,_/_/ /_/ /_/
+    /____/
+
+</code>
+<div id="logstream" style="font-family: monospace;">
+    {% for line in lines %}
+        <p>{{ line }}</p>
+    {% endfor %}
+
+</div>
+<div id="controls">
+    <button id="clear">Clear</button>
+    <input type="checkbox" id="stick" checked>
+    <label for="stick">Stick to bottom</label><br>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var es = new EventSource('/api/logs');
+    es.onmessage = function (event) {
+      var messages_dom = document.getElementById('logstream');
+      var message_dom = document.createElement('p');
+      var content_dom = document.createTextNode(event.data);
+      message_dom.appendChild(content_dom);
+      messages_dom.appendChild(message_dom);
+      if (document.getElementById('stick').checked) {
+        message_dom.scrollIntoView()
+      }
+    };
+  });
+
+  document.getElementById('clear').onclick = function () {
+    var messages_dom = document.getElementById('logstream');
+    while (messages_dom.lastChild) {
+      messages_dom.removeChild(messages_dom.lastChild);
+    }
+  }
+</script>
+</body>
+</html>

@@ -41,7 +41,7 @@ class NFCTagEmulator:
 
     async def request_ndef_update(self, **kwargs):
         self.ndef_update = True
-        self.logger.info('NDEF record update requested')
+        self.logger.debug('NDEF record update requested')
         await self.stop()
 
     async def run_nfc_tag_emulator(self):
@@ -63,13 +63,13 @@ class NFCTagEmulator:
 
             except FileNotFoundError:
                 serve_nfc = False
-                self.logger.info('Unable to emulate NFC tag. Is libnfc installed?')
+                self.logger.warning('Unable to emulate NFC tag. Is libnfc installed?')
 
-        self.logger.info(f'Stopping NFC emulation: {stdout}\n{stderr}')
+        self.logger.debug(f'Stopping NFC emulation: {stdout}\t{stderr}')
 
     async def stop(self):
         if self.libnfc_proc and self.libnfc_proc.returncode is None:
-            self.logger.info('Terminating NFC emulator process')
+            self.logger.debug('Terminating NFC emulator process')
             self.libnfc_proc.terminate()
             await self.libnfc_proc.wait()
 
