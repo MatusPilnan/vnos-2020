@@ -1,3 +1,6 @@
+import asyncio
+
+
 def vypicuj(picung=None):
     raise RuntimeError(picung)
 
@@ -27,3 +30,18 @@ class Event:
         super().__init__()
         self.event_type = event_type,
         self.payload = payload
+
+
+class EventQueue:
+    __queue = None
+    __loop = None
+    event_observers = set()
+
+    @staticmethod
+    def get_queue(loop=None):
+        if EventQueue.__loop is None and loop is not None:
+            EventQueue.__loop = loop
+        if EventQueue.__queue is None:
+            EventQueue.__queue = asyncio.Queue(loop=loop)
+
+        return EventQueue.__queue

@@ -3,11 +3,10 @@ from os.path import basename
 from shutil import rmtree
 from typing import Dict
 
-from varpivo import Event, event_queue, event_observers
 from varpivo.config.config import RECIPES_DIR, CHECKPOINT_DIR
 from varpivo.cooking.recipe import Recipe, TestRecipe
 from varpivo.kettle import Kettle
-from varpivo.utils import prepare_recipe_files
+from varpivo.utils import prepare_recipe_files, EventQueue, Event
 from varpivo.utils.BeerXMLUnicodeParser import BeerXMLUnicodeParser
 from varpivo.utils.librarian import get_selected_recipe, save_selected_recipe
 
@@ -34,9 +33,9 @@ class CookBook:
                     brewing_finished = False
                     break
 
-            await event_queue.put(Event(Event.WS, payload=event.payload.to_keg()))
+            await EventQueue.get_queue().put(Event(Event.WS, payload=event.payload.to_keg()))
             if brewing_finished:
-                await event_queue.put(Event(Event.BREW_SESSION_FINISHED, None))
+                await EventQueue.get_queue().put(Event(Event.BREW_SESSION_FINISHED, None))
                 CookBook.get_instance().unselect_recipe()
 
     def __init__(self) -> None:
@@ -46,7 +45,7 @@ class CookBook:
         else:
             CookBook.__instance = self
 
-        event_observers.add(CookBook.step_observer)
+        EventQueue.event_observers.add(CookBook.step_observer)
         self.load_checkpoint()
         parser = BeerXMLUnicodeParser()
         path = RECIPES_DIR
@@ -63,7 +62,7 @@ class CookBook:
         if self.selected_recipe:
             return False
         self.selected_recipe = self[recipeId]
-        await event_queue.put(Event(Event.BREW_SESSION_STARTED, None))
+        await EventQueue.get_queue().put(Event(Event.BREW_SESSION_STARTED, None))
         return True
 
     def unselect_recipe(self):

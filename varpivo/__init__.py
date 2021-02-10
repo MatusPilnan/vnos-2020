@@ -1,13 +1,13 @@
 import asyncio
-from asyncio import Queue
 from functools import wraps
 
 from quart import websocket, jsonify, make_response, render_template, request
 from quart_cors import cors
+from quart_openapi import OpenApiView
 from quart_openapi import Pint
 from swagger_ui import quart_api_doc
 
-from main import loop
+from varpivo.api import blueprints
 from varpivo.config import config
 from varpivo.hardware.buttons import Buttons
 from varpivo.hardware.display import Display
@@ -19,7 +19,7 @@ from varpivo.info.system_info import SystemInfo
 from varpivo.logging import setup_logger, log_reader, stream_log_reader
 from varpivo.security.security import Security
 from varpivo.ui import UserInterface
-from varpivo.utils import Event
+from varpivo.utils import Event, EventQueue
 from varpivo.utils.network import ServerSentEvent
 from varpivo.utils.sounds import Songs
 
@@ -44,9 +44,11 @@ async def ws_observer(event):
 
 
 connected_websockets = set()
-event_queue = Queue(loop=loop)
+event_queue = EventQueue.get_queue()
 Buttons.get_instance()
-event_observers = {ws_observer, Scale.calibration_observer, Security.security_observer, UserInterface.event_observer}
+event_observers = EventQueue.event_observers
+event_observers.update(
+    {ws_observer, Scale.calibration_observer, Security.security_observer, UserInterface.event_observer})
 
 
 def collect_websocket(func):
@@ -111,9 +113,6 @@ async def shutdown():
         app.logger.info("Or maybe not...")
 
 
-from varpivo.api import recipe
-from quart_openapi import OpenApiView
-
 SystemInfo.add_observer(send_temperature, [SystemInfo.TEMPERATURE, SystemInfo.HEATING])
 SystemInfo.add_observer(send_weight, [SystemInfo.WEIGHT])
 
@@ -143,5 +142,6 @@ async def swagger():
 
 
 nieco = OpenApiView(app)
-
+for blueprint in blueprints:
+    app.register_blueprint(blueprint)
 quart_api_doc(app, config_url='http://127.0.0.1:5000/openapi.json', url_prefix='/api/doc', title="Var:Pivo API")

@@ -1,10 +1,24 @@
 import logging
 import random
 import string
+from http import HTTPStatus
+
+from quart import request, jsonify
 
 from varpivo.config import config
 from varpivo.utils import Event
 from varpivo.utils.librarian import load_security, save_security, discard_security
+
+
+def brew_session_code_required(func):
+    async def check(*args, **kwargs):
+        if not Security.check_code(request.headers.get(config.BREW_SESSION_CODE_HEADER)):
+            return jsonify({'error': "Missing or invalid brew session code"}), HTTPStatus.UNAUTHORIZED
+        return await func(*args, **kwargs)
+
+    check.__doc__ = func.__doc__
+    check.__name__ = func.__name__
+    return check
 
 
 class Security:

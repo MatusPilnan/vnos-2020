@@ -2,9 +2,8 @@ import json
 import uuid
 from time import time
 
-from varpivo import event_queue
 from varpivo.kettle import Kettle
-from varpivo.utils import Event
+from varpivo.utils import Event, EventQueue
 
 
 class Step:
@@ -56,14 +55,14 @@ class Step:
 
     async def start(self):
         self.started = time()
-        await event_queue.put(Event(Event.STEP, payload=self))
+        await EventQueue.get_queue().put(Event(Event.STEP, payload=self))
 
     async def stop(self):
         self.finished = time()
-        await event_queue.put(Event(Event.STEP, payload=self))
+        await EventQueue.get_queue().put(Event(Event.STEP, payload=self))
         for next_step in self.next_steps:
             if next_step.available:
-                await event_queue.put(Event(Event.STEP_AUTOSTART, payload=next_step))
+                await EventQueue.get_queue().put(Event(Event.STEP_AUTOSTART, payload=next_step))
                 await next_step.start()
 
     def reset(self):
@@ -103,7 +102,7 @@ class SetTemperature(Step):
         else:
             if self.progress != temperature:
                 self.progress = temperature / self.target
-                await event_queue.put(Event(Event.STEP, payload=self))
+                await EventQueue.get_queue().put(Event(Event.STEP, payload=self))
 
 
 class WeighIngredient(Step):
@@ -139,7 +138,7 @@ class KeepTemperature(Step):
             p = round((time() - self.started) / (self.target - self.started), 2)
             if self.progress != p:
                 self.progress = p
-                await event_queue.put(Event(Event.STEP, payload=self))
+                await EventQueue.get_queue().put(Event(Event.STEP, payload=self))
 
     def reset(self):
         super().reset()
@@ -164,3 +163,7 @@ class AddMisc(Step):
     def __init__(self, name: str, amount: float, misc_type: str, dependencies=None) -> None:
         super().__init__(name=f'Add {name}', description=f'Add {amount:.2f} units of {name} ({misc_type})', duration=1,
                          dependencies=dependencies)
+
+
+def step_to_dict(step: Step):
+    return step.to_dict()

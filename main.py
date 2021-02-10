@@ -7,6 +7,7 @@ import pathlib
 from quart_openapi import Swagger
 
 from varpivo.config import config
+from varpivo.utils import EventQueue
 
 loop = asyncio.get_event_loop()
 
@@ -16,6 +17,7 @@ if __name__ == "__main__":
                             help='Write OpenAPI specification to specified file and exit')
 
     args = arg_parser.parse_args()
+    EventQueue.get_queue(loop)
 
     from varpivo import app
 
