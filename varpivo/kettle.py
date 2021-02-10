@@ -1,7 +1,7 @@
 import asyncio
 
-from varpivo import Thermometer
 from varpivo.hardware.heater import Heater
+from varpivo.hardware.thermometer import Thermometer
 from varpivo.utils.librarian import save_kettle, load_kettle
 
 
