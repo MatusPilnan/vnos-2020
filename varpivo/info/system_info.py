@@ -9,7 +9,7 @@ from varpivo.hardware.heater import Heater
 from varpivo.hardware.scale import Scale
 from varpivo.hardware.thermometer import Thermometer
 from varpivo.security.security import Security
-from varpivo.utils.network import get_local_ip, get_public_ip
+from varpivo.utils.network import get_local_ip, get_public_ip, Ngrok
 
 
 class SystemInfo:
@@ -53,6 +53,9 @@ class SystemInfo:
     @staticmethod
     async def collect_info():
         instance = SystemInfo.get_instance()
+        ngrok_address = Ngrok.get_address()
+        if ngrok_address is not None:
+            instance.addresses.append(ngrok_address)
         await instance.resolve_ip_addresses()
         await instance.notify_observers()
         while True:

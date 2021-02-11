@@ -49,7 +49,7 @@ class NetworkScreen(Screen):
 
         message = 'IP Addresses:\n' + '\n'.join(SystemInfo.get_instance().addresses)
         draw.rectangle(self.rect, outline="black", fill="black")
-        draw.text((5, 5), message, fill="white")
+        draw.text((1, 5), message, fill="white")
 
 
 class SecurityScreen(Screen):

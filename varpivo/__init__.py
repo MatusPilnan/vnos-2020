@@ -20,7 +20,7 @@ from varpivo.logging import setup_logger, log_reader, stream_log_reader
 from varpivo.security.security import Security
 from varpivo.ui import UserInterface
 from varpivo.utils import Event, EventQueue
-from varpivo.utils.network import ServerSentEvent
+from varpivo.utils.network import ServerSentEvent, Ngrok
 from varpivo.utils.sounds import Songs
 
 UserInterface.get_instance()
@@ -133,7 +133,7 @@ async def logs():
         response.timeout = None
         return response
     else:
-        return await render_template('logstream.html', lines=log_reader(encode=False))
+        return await render_template('logstream.html', lines=log_reader(encode=False), ngrok=Ngrok.get_address())
 
 
 @app.route('/api/doc/swagger.json')

@@ -1,3 +1,4 @@
+import logging
 import socket
 from typing import Optional
 
@@ -50,3 +51,29 @@ class ServerSentEvent:
             message = f"{message}\nretry: {self.retry}"
         message = f"{message}\r\n\r\n"
         return message.encode('utf-8')
+
+
+class Ngrok:
+    tunnel = None
+    enabled = True
+
+    @staticmethod
+    def get_address():
+        if Ngrok.enabled:
+            if Ngrok.tunnel is None:
+                from pyngrok import ngrok
+                try:
+                    Ngrok.tunnel = ngrok.connect()
+                except Exception as e:
+                    logging.getLogger('quart.app').warning(f'Unable to start Ngrok: {e}')
+                    return None
+            ngrok_address = Ngrok.tunnel.public_url
+            if ngrok_address.startswith('http://'):
+                ngrok_address = ngrok_address[len('http://'):]
+            elif ngrok_address.startswith('https://'):
+                ngrok_address = ngrok_address[len('https://'):]
+            return ngrok_address
+        else:
+            logging.getLogger('quart.app').info(f'Ngrok is disabled')
+        return None
+
