@@ -12,3 +12,4 @@ swagger-ui-py
 httpx
 rtttl~=0.2
 
+Pillow~=5.4.1
