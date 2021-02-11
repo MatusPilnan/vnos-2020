@@ -1,13 +1,14 @@
 from http import HTTPStatus
+from typing import Dict
 
-from quart import jsonify
+from quart import jsonify, request
 from quart_openapi import Resource, PintBlueprint
 
+from varpivo.api.external import BrewersFriend
 from varpivo.api.models import *
-from varpivo.config import config
 from varpivo.cooking.cookbook import CookBook
-from varpivo.security.security import brew_session_code_required
 from varpivo.steps import step_to_dict
+from varpivo.utils.librarian import check_recipe_file_existence
 
 app = PintBlueprint('recipes', __name__)
 
@@ -27,8 +28,8 @@ class RecipeList(Resource):
             {"recipes": list(map(lambda recipe: recipe.cookbook_entry, CookBook.get_instance().recipes.values()))})
 
 
-recipe_step = app.create_validator('recipe_step', step_model)
 recipe_steps = app.create_validator('recipe_steps', recipe_steps_model)
+recipe = app.create_validator('recipe', recipe_model)
 
 
 @app.param("recipeId", "Recipe ID", "path", required=True)
@@ -36,8 +37,8 @@ recipe_steps = app.create_validator('recipe_steps', recipe_steps_model)
 class Recipe(Resource):
     @app.doc(tags=['Recipes'])
     @app.response(HTTPStatus(HTTPStatus.NOT_FOUND), "Recipe not found")
-    @app.response(HTTPStatus(HTTPStatus.OK), description="Returns a signle recipe",
-                  validator=app.create_validator('recipe', recipe_model))
+    @app.response(HTTPStatus(HTTPStatus.OK), description="Returns a single recipe",
+                  validator=recipe)
     async def get(self, recipeId):
         """Get single recipe"""
         try:
@@ -61,41 +62,33 @@ class Recipe(Resource):
             return jsonify({"error": 'Recipe not found'}), HTTPStatus.NOT_FOUND
 
 
-@app.param("stepId", "Step ID", "path", required=True)
-@app.route('/step/<' + 'stepId>')
-class StepStart(Resource):
-    @app.response(HTTPStatus(HTTPStatus.OK), description="", validator=recipe_step)
-    @app.doc(tags=['Recipe steps'])
-    @app.param(config.BREW_SESSION_CODE_HEADER, 'Brew session code', _in='header')
-    @brew_session_code_required
-    async def post(self, stepId):
-        """Start specified step"""
-        if not CookBook.get_instance().selected_recipe:
-            return jsonify({"error": 'No recipe selected'}), HTTPStatus.FAILED_DEPENDENCY
+@app.route('/recipe/brewers_friend')
+class BrewersFriendRecipe(Resource):
+    @app.doc(tags=['Recipes'])
+    @app.expect(app.create_validator('brewers_friend', brewers_friend_request_model))
+    @app.response(HTTPStatus(HTTPStatus.OK), "Recipe imported successfully", recipe)
+    @app.response(HTTPStatus(HTTPStatus.NOT_FOUND), "Recipe not found on Brewer's Friend")
+    @app.response(HTTPStatus(HTTPStatus.CONFLICT), "Recipe already exists and neither 'replace' nor 'add' were set")
+    @app.response(HTTPStatus(HTTPStatus.FORBIDDEN), "Recipe is not accessible on Brewer's Friend, possibly because "
+                                                    "it's private")
+    async def post(self):
+        """Import a recipe from Brewer's Friend"""
+        req: Dict = await request.json
+        request_id = req["id"]
+        replace = req.setdefault('replace', False)
+        add = req.setdefault('add', False)
+        recipe_id = f'brewers_friend_{request_id}'
+        if check_recipe_file_existence(recipe_id) and not (replace or add):
+            return jsonify({"error": 'Recipe already exists'}), HTTPStatus.CONFLICT
         try:
-            step = CookBook.get_instance().selected_recipe.steps[stepId]
-        except IndexError:
-            return jsonify({"error": 'Step not found'}), HTTPStatus.NOT_FOUND
-        if not step.available:
-            return jsonify({"error": 'Step not yet available'}), HTTPStatus.FAILED_DEPENDENCY
-        await step.start()
-        return jsonify(step_to_dict(step))
-
-    @app.response(HTTPStatus(HTTPStatus.OK), description="", validator=recipe_step)
-    @app.doc(tags=['Recipe steps'])
-    @app.param(config.BREW_SESSION_CODE_HEADER, 'Brew session code', _in='header')
-    @brew_session_code_required
-    async def delete(self, stepId):
-        """Finish specified step"""
-        if not CookBook.get_instance().selected_recipe:
-            return jsonify({"error": 'No recipe selected'}), HTTPStatus.FAILED_DEPENDENCY
+            beerxml = await BrewersFriend.get_beerxml_recipe(request_id)
+        except FileNotFoundError:
+            return jsonify({"error": 'Recipe not found'}), HTTPStatus.NOT_FOUND
+        except PermissionError:
+            return jsonify({"error": 'Recipe not accessible'}), HTTPStatus.FORBIDDEN
         try:
-            step = CookBook.get_instance().selected_recipe.steps[stepId]
-        except IndexError:
-            return jsonify({"error": 'Step not found'}), HTTPStatus.NOT_FOUND
+            new_recipe = CookBook.get_instance().add_recipe_from_beerxml(beerxml, recipe_id, replace=replace, add=add)
+        except FileExistsError:
+            return jsonify({"error": 'Recipe already exists'}), HTTPStatus.CONFLICT
 
-        if not step.started:
-            return jsonify({"error": 'Step not in progress'}), HTTPStatus.FAILED_DEPENDENCY
-        if not step.finished:
-            await step.stop()
-        return jsonify(step_to_dict(step))
+        return jsonify(new_recipe.cookbook_entry)

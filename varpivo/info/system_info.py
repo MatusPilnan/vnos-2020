@@ -61,7 +61,7 @@ class SystemInfo:
             instance.weight = int(await (await Scale.get_instance()).weight)
             instance.heating = Heater.get_instance().heat
             if instance.ip_timed_out:
-                await instance.resolve_ip_addresses(timeout=1)
+                await instance.resolve_ip_addresses(timeout=5)
 
             await instance.notify_observers()
             await asyncio.sleep(0.5)

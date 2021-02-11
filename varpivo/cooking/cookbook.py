@@ -1,4 +1,5 @@
 import glob
+import time
 from os.path import basename
 from shutil import rmtree
 from typing import Dict
@@ -6,9 +7,9 @@ from typing import Dict
 from varpivo.config.config import RECIPES_DIR, CHECKPOINT_DIR
 from varpivo.cooking.recipe import Recipe, TestRecipe
 from varpivo.kettle import Kettle
-from varpivo.utils import prepare_recipe_files, EventQueue, Event
+from varpivo.utils import prepare_recipe_files, EventQueue, Event, replace_boolean
 from varpivo.utils.BeerXMLUnicodeParser import BeerXMLUnicodeParser
-from varpivo.utils.librarian import get_selected_recipe, save_selected_recipe
+from varpivo.utils.librarian import get_selected_recipe, save_selected_recipe, save_beerxml, check_recipe_file_existence
 
 
 class CookBook:
@@ -93,3 +94,21 @@ class CookBook:
             save_selected_recipe(self.selected_recipe)
             return True
         return False
+
+    def add_recipe_from_beerxml(self, beerxml, recipe_id, replace=False, add=False):
+        beerxml = replace_boolean(beerxml)
+
+        if check_recipe_file_existence(recipe_id):
+            if add:
+                recipe_id = f'{recipe_id}-{time.ctime()}'
+            elif not replace:
+                raise FileExistsError
+
+        filename = recipe_id + '.xml'
+        recipe_id = filename + '0'
+        parser = BeerXMLUnicodeParser()
+        recipes = parser.parse_from_string(beerxml)
+
+        self.recipes[recipe_id] = Recipe(id=recipe_id, recipe=recipes[0])
+        save_beerxml(filename, beerxml)
+        return self.recipes[recipe_id]

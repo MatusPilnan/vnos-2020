@@ -64,3 +64,13 @@ def discard_security():
     checkpoint_location = os.path.join(CHECKPOINT_DIR, SECURITY_CHECKPOINT_FILE)
     for file in glob(checkpoint_location + '*'):
         os.remove(file)
+
+
+def check_recipe_file_existence(recipe_id):
+    return os.path.isfile(os.path.join(RECIPES_DIR, f'{recipe_id}.xml'))
+
+
+def save_beerxml(filename, content):
+    path = os.path.join(RECIPES_DIR, filename)
+    with open(path, 'w') as f:
+        f.write(content)

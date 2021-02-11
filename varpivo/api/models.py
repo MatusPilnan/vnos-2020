@@ -167,3 +167,25 @@ message_model = {
         }
     }
 }
+
+brewers_friend_request_model = {
+    "type": "object",
+    "title": "Brewer's Friend recipe ID",
+    "required": ["id"],
+    "properties": {
+        "id": {
+            "type": "string",
+            "description": "Brewer's Friend recipe ID (can be found in recipe URL)"
+        },
+        "replace": {
+            "type": "boolean",
+            "default": "false",
+            "description": "Whether to replace the recipe if it already exists"
+        },
+        "add": {
+            "type": "boolean",
+            "default": "false",
+            "description": "Whether to add the recipe even if it already exists"
+        }
+    }
+}
