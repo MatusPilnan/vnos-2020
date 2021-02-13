@@ -171,11 +171,14 @@ message_model = {
 brewers_friend_request_model = {
     "type": "object",
     "title": "Brewer's Friend recipe ID",
-    "required": ["id"],
     "properties": {
         "id": {
             "type": "string",
             "description": "Brewer's Friend recipe ID (can be found in recipe URL)"
+        },
+        "url": {
+            "type": "string",
+            "description": "Brewer's Friend recipe URL"
         },
         "replace": {
             "type": "boolean",

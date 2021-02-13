@@ -1,4 +1,5 @@
 import asyncio
+from asyncio import CancelledError
 from functools import wraps
 
 from quart import websocket, jsonify, make_response, render_template, request
@@ -59,8 +60,8 @@ def collect_websocket(func):
         connected_websockets.add(queue)
         try:
             return await func(queue, *args, **kwargs)
-        except Exception as e:
-            app.logger.exception(e)
+        except CancelledError:
+            app.logger.info("Client disconnected")
         finally:
             connected_websockets.remove(queue)
 
@@ -143,5 +144,5 @@ async def swagger():
 
 nieco = OpenApiView(app)
 for blueprint in blueprints:
-    app.register_blueprint(blueprint)
+    app.register_blueprint(cors(blueprint, allow_origin='*'))
 quart_api_doc(app, config_url='http://127.0.0.1:5000/openapi.json', url_prefix='/api/doc', title="Var:Pivo API")

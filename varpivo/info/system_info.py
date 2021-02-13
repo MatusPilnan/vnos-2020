@@ -84,7 +84,7 @@ class SystemInfo:
         self.addresses.append(get_local_ip())
         try:
             self.addresses.append(await get_public_ip(timeout))
-        except httpx.ReadTimeout:
+        except (httpx.ReadTimeout, httpx.ConnectTimeout):
             logging.getLogger('quart.app').warning('Public IP retrieval timed out.')
             self.ip_timed_out = True
         self.changed_properties.add(SystemInfo.ADDRESSES)

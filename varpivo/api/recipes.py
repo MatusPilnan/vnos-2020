@@ -71,21 +71,25 @@ class BrewersFriendRecipe(Resource):
     @app.response(HTTPStatus(HTTPStatus.CONFLICT), "Recipe already exists and neither 'replace' nor 'add' were set")
     @app.response(HTTPStatus(HTTPStatus.FORBIDDEN), "Recipe is not accessible on Brewer's Friend, possibly because "
                                                     "it's private")
+    @app.response(HTTPStatus(HTTPStatus.BAD_REQUEST), "None of recipe ID or Brewer's friend URL provided")
     async def post(self):
         """Import a recipe from Brewer's Friend"""
         req: Dict = await request.json
-        request_id = req["id"]
+        brewers_friend_id = req.setdefault("id", None)
+        brewers_friend_url = req.setdefault('url', None)
         replace = req.setdefault('replace', False)
         add = req.setdefault('add', False)
-        recipe_id = f'brewers_friend_{request_id}'
+        recipe_id = f'brewers_friend_{brewers_friend_id}'
         if check_recipe_file_existence(recipe_id) and not (replace or add):
             return jsonify({"error": 'Recipe already exists'}), HTTPStatus.CONFLICT
         try:
-            beerxml = await BrewersFriend.get_beerxml_recipe(request_id)
-        except FileNotFoundError:
+            beerxml, recipe_id = await BrewersFriend.get_beerxml_recipe(brewers_friend_id, brewers_friend_url)
+        except (FileNotFoundError, IndexError):
             return jsonify({"error": 'Recipe not found'}), HTTPStatus.NOT_FOUND
         except PermissionError:
             return jsonify({"error": 'Recipe not accessible'}), HTTPStatus.FORBIDDEN
+        except ValueError:
+            return jsonify({"error": "No URL or ID specified"}), HTTPStatus.BAD_REQUEST
         try:
             new_recipe = CookBook.get_instance().add_recipe_from_beerxml(beerxml, recipe_id, replace=replace, add=add)
         except FileExistsError:
