@@ -1,4 +1,5 @@
 import glob
+import logging
 import time
 from os.path import basename
 from shutil import rmtree
@@ -9,7 +10,8 @@ from varpivo.cooking.recipe import Recipe, TestRecipe
 from varpivo.kettle import Kettle
 from varpivo.utils import prepare_recipe_files, EventQueue, Event, replace_boolean
 from varpivo.utils.BeerXMLUnicodeParser import BeerXMLUnicodeParser
-from varpivo.utils.librarian import get_selected_recipe, save_selected_recipe, save_beerxml, check_recipe_file_existence
+from varpivo.utils.librarian import get_selected_recipe, save_selected_recipe, save_beerxml, \
+    check_recipe_file_existence, remove_recipe_file
 
 
 class CookBook:
@@ -53,10 +55,13 @@ class CookBook:
         prepare_recipe_files(glob.glob(f"{path}/*.xml"))
         self.recipes: Dict[str, Recipe] = {}
         for file in glob.glob(f"{path}/*.xml"):
-            for index, recipe in enumerate(parser.parse(xml_file=file)):
-                id = basename(file) + str(index)
-                # noinspection PyTypeChecker
-                self.recipes[id] = Recipe(id=id, recipe=recipe)
+            try:
+                for index, recipe in enumerate(parser.parse(xml_file=file)):
+                    id = basename(file) + str(index)
+                    # noinspection PyTypeChecker
+                    self.recipes[id] = Recipe(id=id, recipe=recipe)
+            except UnicodeDecodeError:
+                logging.getLogger('quart.app').warning(f'Could not parse file: {file}')
         self.recipes['test-recipe'] = TestRecipe()
 
     async def select_recipe(self, recipeId):
@@ -112,3 +117,11 @@ class CookBook:
         self.recipes[recipe_id] = Recipe(id=recipe_id, recipe=recipes[0])
         save_beerxml(filename, beerxml)
         return self.recipes[recipe_id]
+
+    def remove_recipe(self, recipe_id: str):
+        self.recipes.pop(recipe_id)
+        filename = recipe_id.rstrip('0123456789')
+        try:
+            remove_recipe_file(filename)
+        except FileNotFoundError:
+            pass

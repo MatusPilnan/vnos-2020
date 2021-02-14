@@ -1,4 +1,5 @@
 import asyncio
+import logging
 
 
 def vypicuj(picung=None):
@@ -7,13 +8,16 @@ def vypicuj(picung=None):
 
 def prepare_recipe_files(recipe_files):
     for file in recipe_files:
-        with open(file, encoding='utf-8') as f:
-            content = f.read()
+        try:
+            with open(file, encoding='utf-8', errors='replace') as f:
+                content = f.read()
 
-        content = replace_boolean(content)
+            content = replace_boolean(content)
 
-        with open(file, 'w', encoding='utf-8') as f:
-            f.write(content)
+            with open(file, 'w', encoding='utf-8') as f:
+                f.write(content)
+        except UnicodeDecodeError:
+            logging.getLogger('quart.app').warning(f'Could not read file: {file}')
 
 
 def replace_boolean(content):

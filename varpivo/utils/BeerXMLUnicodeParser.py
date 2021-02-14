@@ -9,7 +9,7 @@ class BeerXMLUnicodeParser(Parser):
     def parse(self, xml_file: Text) -> List[Recipe]:
         "Get a list of parsed recipes from BeerXML input"
 
-        with open(xml_file, "rt", encoding='utf-8') as file:
+        with open(xml_file, "rt", encoding='utf-8', errors='replace') as file:
             tree = ElementTree.parse(file)
 
         return self.parse_tree(tree)

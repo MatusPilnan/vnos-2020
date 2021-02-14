@@ -6,7 +6,9 @@ from quart_openapi import Resource, PintBlueprint
 
 from varpivo.api.external import BrewersFriend
 from varpivo.api.models import *
+from varpivo.config import config
 from varpivo.cooking.cookbook import CookBook
+from varpivo.security.security import brew_session_code_required
 from varpivo.steps import step_to_dict
 from varpivo.utils.librarian import check_recipe_file_existence
 
@@ -60,6 +62,19 @@ class Recipe(Resource):
                 return jsonify({"error": 'Recipe already selected'}), HTTPStatus.CONFLICT
         except KeyError:
             return jsonify({"error": 'Recipe not found'}), HTTPStatus.NOT_FOUND
+
+    @app.doc(tags=['Recipes'])
+    @app.response(HTTPStatus(HTTPStatus.NOT_FOUND), "Recipe not found")
+    @app.response(HTTPStatus(HTTPStatus.OK), "Recipe deleted")
+    @app.param(config.BREW_SESSION_CODE_HEADER, 'Brew session code', _in='header')
+    @brew_session_code_required
+    async def delete(self, recipeId):
+        """Removes a recipe"""
+        try:
+            CookBook.get_instance().remove_recipe(recipeId)
+        except KeyError:
+            return jsonify({"error": 'Recipe not found'}), HTTPStatus.NOT_FOUND
+        return jsonify({"message": "OK"})
 
 
 @app.route('/recipe/brewers_friend')

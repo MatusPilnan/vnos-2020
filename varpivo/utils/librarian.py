@@ -74,3 +74,9 @@ def save_beerxml(filename, content):
     path = os.path.join(RECIPES_DIR, filename)
     with open(path, 'w') as f:
         f.write(content)
+
+
+def remove_recipe_file(filename):
+    path = os.path.join(RECIPES_DIR, filename)
+    os.remove(path)
+
